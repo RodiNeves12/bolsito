@@ -1,0 +1,6 @@
+_ref/
+*backup*.json
+*.bak
+*.backup
+.DS_Store
+Thumbs.db

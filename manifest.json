@@ -1,0 +1,21 @@
+{
+  "name": "Bolsito — Finanças Pessoais",
+  "short_name": "Bolsito",
+  "description": "Hub pessoal 100% offline de finanças pessoais, despesas, rendas, caixinhas com CDI e controle de passagens de transporte.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f3efe6",
+  "theme_color": "#263529",
+  "lang": "pt-BR",
+  "categories": ["finance", "utilities", "productivity"],
+  "icons": [
+    {
+      "src": "./assets/icon-bolsito.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

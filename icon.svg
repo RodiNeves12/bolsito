@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#263529"/>
+  <path d="M96 168a28 28 0 0 1 28-28h264a28 28 0 0 1 28 28v44a32 32 0 0 0 0 64v68a28 28 0 0 1-28 28H124a28 28 0 0 1-28-28v-68a32 32 0 0 0 0-64v-44Z" fill="#FAF8F3"/>
+  <line x1="296" y1="156" x2="296" y2="356" stroke="#263529" stroke-opacity="0.22" stroke-width="8" stroke-dasharray="14 14" stroke-linecap="round"/>
+  <rect x="136" y="184" width="120" height="22" rx="11" fill="#3D6B4F" fill-opacity="0.25"/>
+  <text x="196" y="294" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="88" font-weight="700" fill="#263529">R$</text>
+  <circle cx="352" cy="244" r="24" fill="#3D6B4F"/>
+  <rect x="328" y="294" width="48" height="14" rx="7" fill="#B45A2D"/>
+</svg>

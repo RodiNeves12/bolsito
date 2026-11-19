@@ -1,0 +1,2024 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-palette="floresta">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#263529" />
+  <meta
+    name="description"
+    content="Bolsito — Hub pessoal 100% offline de finanças pessoais, despesas, rendas, caixinhas com CDI e controle de passagens de transporte."
+  />
+  <title>Bolsito — Finanças Pessoais</title>
+  <link rel="icon" type="image/png" href="./assets/icon-bolsito.png" />
+  <link rel="apple-touch-icon" href="./assets/icon-bolsito.png" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Sidebar Fixa (Desktop >= 960px) / Header + Bottom Nav (Mobile < 960px) -->
+    <aside class="app-sidebar" aria-label="Navegação principal">
+      <div class="sidebar-brand">
+        <div class="brand">
+          <img
+            src="./assets/icon-bolsito.png"
+            alt="Bolsito"
+            class="brand-icon"
+            width="40"
+            height="40"
+          />
+          <div class="brand-copy">
+            <span class="brand-title">Bolsito<span class="brand-offline-dot" title="100% offline" aria-hidden="true"></span></span>
+            <span class="brand-subtitle">Finanças Pessoais</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navegação de Abas agrupada (Sidebar desktop / Bottom Nav + Mais no mobile) -->
+      <nav class="main-nav" aria-label="Seções da aplicação">
+        <div class="nav-group" role="group" aria-label="Financeiro">
+          <span class="nav-group-label">FINANCEIRO</span>
+
+          <button type="button" class="nav-tab nav-mobile-primary is-active" data-view="dashboard" aria-current="page">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect width="7" height="9" x="3" y="3" rx="1" />
+              <rect width="7" height="5" x="14" y="3" rx="1" />
+              <rect width="7" height="9" x="14" y="12" rx="1" />
+              <rect width="7" height="5" x="3" y="16" rx="1" />
+            </svg>
+            <span class="nav-label">Dashboard</span>
+            <span class="nav-label-short">Início</span>
+          </button>
+
+          <button type="button" class="nav-tab nav-mobile-primary" data-view="flow">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
+              <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />
+            </svg>
+            <span class="nav-label">Despesas &amp; Rendas</span>
+            <span class="nav-label-short">Fluxo</span>
+          </button>
+
+          <button type="button" class="nav-tab nav-mobile-primary" data-view="caixinhas">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2V5z" />
+              <path d="M2 9v1c0 1.1.9 2 2 2h1" />
+              <path d="M16 11h.01" />
+            </svg>
+            <span class="nav-label">Caixinhas CDI</span>
+            <span class="nav-label-short">Caixinhas</span>
+          </button>
+        </div>
+
+        <div class="nav-group" role="group" aria-label="Transporte">
+          <span class="nav-group-label">TRANSPORTE</span>
+
+          <button type="button" class="nav-tab nav-mobile-primary" data-view="monthly">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect width="18" height="18" x="3" y="4" rx="2" />
+              <path d="M16 2v4" />
+              <path d="M8 2v4" />
+              <path d="M3 10h18" />
+            </svg>
+            <span class="nav-label">Visão Mensal</span>
+            <span class="nav-label-short">Passagens</span>
+          </button>
+
+          <button type="button" class="nav-tab nav-mobile-secondary" data-view="annual">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+              <path d="M18 17V9" />
+              <path d="M13 17V5" />
+              <path d="M8 17v-3" />
+            </svg>
+            <span class="nav-label">Visão Anual</span>
+            <span class="nav-label-short">Anual</span>
+          </button>
+
+          <button type="button" class="nav-tab nav-mobile-secondary" data-view="fares">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 2v20" />
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            </svg>
+            <span class="nav-label">Tarifas e Histórico</span>
+            <span class="nav-label-short">Tarifas</span>
+          </button>
+
+          <button type="button" class="nav-tab nav-mobile-secondary" data-view="holidays">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M8 2v4" />
+              <path d="M16 2v4" />
+              <rect width="18" height="18" x="3" y="4" rx="2" />
+              <path d="M3 10h18" />
+              <path d="m9 16 2 2 4-4" />
+            </svg>
+            <span class="nav-label">Feriados</span>
+            <span class="nav-label-short">Feriados</span>
+          </button>
+        </div>
+
+        <div class="nav-group" role="group" aria-label="Sistema">
+          <span class="nav-group-label">SISTEMA</span>
+
+          <button type="button" class="nav-tab nav-mobile-secondary" data-view="backup">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            <span class="nav-label">Backup e Config</span>
+            <span class="nav-label-short">Config</span>
+          </button>
+        </div>
+
+        <!-- Botão "Mais" exibido apenas na bottom nav mobile (< 960px) -->
+        <button
+          type="button"
+          id="btn-mobile-more-nav"
+          class="nav-tab mobile-more-trigger"
+          aria-expanded="false"
+          aria-controls="mobile-more-sheet"
+        >
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="1" />
+            <circle cx="19" cy="12" r="1" />
+            <circle cx="5" cy="12" r="1" />
+          </svg>
+          <span class="nav-label-short">Mais</span>
+        </button>
+      </nav>
+
+      <!-- Ações Rápidas na Base da Sidebar (ou Direita do Header no Mobile) -->
+      <div class="sidebar-actions">
+        <button
+          type="button"
+          id="btn-install-pwa"
+          class="sidebar-action-btn sidebar-action-accent hidden"
+          title="Instalar aplicativo no dispositivo"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" x2="12" y1="15" y2="3" />
+          </svg>
+          <span class="action-text">Instalar app</span>
+        </button>
+
+        <div class="sidebar-actions-row">
+          <button
+            type="button"
+            id="btn-today-global"
+            class="sidebar-action-btn"
+            title="Ir para o mês atual"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <span class="action-text">Hoje</span>
+          </button>
+
+          <button
+            type="button"
+            id="btn-privacy-toggle"
+            class="sidebar-action-btn sidebar-action-icon-only"
+            aria-label="Alternar modo privacidade (atalho P)"
+            aria-pressed="false"
+            title="Modo Privacidade (tecla P)"
+          >
+            <span id="privacy-icon" class="theme-icon-slot" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            id="btn-theme-toggle"
+            class="sidebar-action-btn sidebar-action-icon-only"
+            aria-label="Alternar tema claro ou escuro"
+            title="Alternar tema claro/escuro"
+          >
+            <span id="theme-icon" class="theme-icon-slot" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+              </svg>
+            </span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Menu Mobile "Mais" (acesso às visões secundárias em telas < 960px) -->
+    <div id="mobile-more-backdrop" class="mobile-more-backdrop hidden" aria-hidden="true"></div>
+    <div id="mobile-more-sheet" class="mobile-more-sheet hidden" role="dialog" aria-label="Mais seções">
+      <div class="mobile-more-header">
+        <span class="micro-label">NAVEGAÇÃO COMPLETA</span>
+        <button type="button" id="btn-close-mobile-more" class="btn btn-icon btn-sm" aria-label="Fechar menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="mobile-more-list">
+        <button type="button" class="mobile-more-item" data-view="annual">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+            <path d="M18 17V9" />
+            <path d="M13 17V5" />
+            <path d="M8 17v-3" />
+          </svg>
+          <span>Passagens — Visão Anual</span>
+        </button>
+        <button type="button" class="mobile-more-item" data-view="fares">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2v20" />
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
+          <span>Passagens — Tarifas e Histórico</span>
+        </button>
+        <button type="button" class="mobile-more-item" data-view="holidays">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M8 2v4" />
+            <path d="M16 2v4" />
+            <rect width="18" height="18" x="3" y="4" rx="2" />
+            <path d="M3 10h18" />
+            <path d="m9 16 2 2 4-4" />
+          </svg>
+          <span>Passagens — Feriados</span>
+        </button>
+        <button type="button" class="mobile-more-item" data-view="backup">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+          <span>Backup e Config</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Área Principal -->
+    <div class="app-content">
+      <!-- Cabeçalho Editorial -->
+      <header class="editorial-header">
+        <div class="editorial-heading">
+          <span id="editorial-kicker" class="editorial-kicker">01 / VISÃO GERAL</span>
+          <h1 id="editorial-view-title" class="editorial-title">Dashboard</h1>
+        </div>
+
+        <div class="editorial-meta">
+          <button
+            type="button"
+            id="btn-quick-new-expense"
+            class="btn btn-primary btn-sm"
+            title="Lançamento rápido de gasto avulso (tecla N)"
+          >
+            <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14" />
+              <path d="M12 5v14" />
+            </svg>
+            <span>Novo Gasto</span>
+          </button>
+          <span id="editorial-date-meta" class="meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect width="18" height="18" x="3" y="4" rx="2" />
+              <path d="M16 2v4" />
+              <path d="M8 2v4" />
+              <path d="M3 10h18" />
+            </svg>
+            <span id="editorial-date-text">Hoje</span>
+          </span>
+          <span class="meta-item meta-offline" title="Todos os dados ficam salvos localmente no seu dispositivo">
+            <span class="offline-dot" aria-hidden="true"></span>
+            <span>100% offline</span>
+          </span>
+        </div>
+      </header>
+
+      <!-- Conteúdo das Visões -->
+      <main class="app-main">
+        <!-- ==================== 01. DASHBOARD (FINANCEIRO) ==================== -->
+        <section id="view-dashboard" class="view-section is-active" aria-label="Dashboard Financeiro">
+          <div class="section-header-bar">
+            <p class="section-lead">
+              Panorama consolidado das suas finanças pessoais, Passagens integrado automaticamente e reservas CDI.
+            </p>
+            <div class="year-switcher">
+              <button type="button" id="btn-dash-prev-month" class="btn btn-icon btn-sm" aria-label="Mês anterior">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m15 18-6-6 6-6" />
+                </svg>
+              </button>
+              <strong id="dashboard-month-label" class="month-switcher-label">Novembro 2026</strong>
+              <button type="button" id="btn-dash-next-month" class="btn btn-icon btn-sm" aria-label="Próximo mês">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Destaque Editorial: Total Líquido Consolidado -->
+          <section id="dashboard-net-worth" class="card net-worth-card" aria-label="Total Líquido Consolidado">
+            <!-- Renderizado via financeUI.js -->
+          </section>
+
+          <!-- Linha 1: 4 KPIs Principais (Bento Grid) -->
+          <div id="dashboard-kpis" class="annual-kpi-grid">
+            <!-- Renderizado via financeUI.js -->
+          </div>
+
+          <!-- Linha 2: Gráficos SVG / CSS -->
+          <div class="dashboard-charts-grid">
+            <section class="card chart-card" aria-labelledby="dash-donut-title">
+              <div class="card-header-row">
+                <div>
+                  <span class="micro-label">DISTRIBUIÇÃO</span>
+                  <h2 id="dash-donut-title" class="card-title serif-heading-sm">Gastos por Categoria</h2>
+                </div>
+                <span id="dashboard-donut-subtitle" class="pill pill-muted">Mês atual</span>
+              </div>
+              <div id="dashboard-donut-container" class="mt-12">
+                <!-- Renderizado via financeUI.js -->
+              </div>
+            </section>
+
+            <section class="card chart-card" aria-labelledby="dash-evolution-title">
+              <div class="card-header-row">
+                <div>
+                  <span class="micro-label">HISTÓRICO 12 MESES</span>
+                  <h2 id="dash-evolution-title" class="card-title serif-heading-sm">Receita vs. Despesa vs. Aportes</h2>
+                </div>
+                <div class="chart-legend chart-legend-interactive" role="group" aria-label="Filtrar séries do gráfico">
+                  <button type="button" class="legend-chip is-active" data-toggle-series="income" aria-pressed="true">
+                    <i class="dot dot-income"></i>
+                    <span>Receita</span>
+                  </button>
+                  <button type="button" class="legend-chip is-active" data-toggle-series="expenses" aria-pressed="true">
+                    <i class="dot dot-expense"></i>
+                    <span>Despesa</span>
+                  </button>
+                  <button type="button" class="legend-chip is-active" data-toggle-series="contributions" aria-pressed="true">
+                    <i class="dot dot-contrib"></i>
+                    <span>Aportes</span>
+                  </button>
+                </div>
+              </div>
+              <div id="dashboard-evolution-chart" class="css-bar-chart">
+                <!-- Renderizado via financeUI.js -->
+              </div>
+            </section>
+          </div>
+
+          <!-- Linha 3: Resumos Acionáveis -->
+          <div class="two-col-layout dashboard-bottom-grid mt-18">
+            <section class="card card-stretch" aria-labelledby="dash-pending-title">
+              <div class="card-header-row">
+                <div>
+                  <span class="micro-label">CONTAS DO MÊS</span>
+                  <h2 id="dash-pending-title" class="card-title serif-heading-sm">Próximos Vencimentos &amp; Pendências</h2>
+                </div>
+                <span id="dashboard-pending-count" class="pill pill-muted">0 pendentes</span>
+              </div>
+              <div id="dashboard-pending-list" class="pending-list mt-12">
+                <!-- Renderizado via financeUI.js -->
+              </div>
+              <div id="dashboard-pending-footer" class="card-footer-summary">
+                <!-- Renderizado via financeUI.js -->
+              </div>
+            </section>
+
+            <section class="card card-stretch" aria-labelledby="dash-proj-title">
+              <div class="card-header-row">
+                <div>
+                  <span class="micro-label">CAIXINHAS CDI</span>
+                  <h2 id="dash-proj-title" class="card-title serif-heading-sm">Projeção das Caixinhas (12 meses)</h2>
+                </div>
+                <button type="button" class="btn-inline-link" data-goto-view="caixinhas">
+                  <span>Ver caixinhas</span>
+                  <svg class="inline-link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M5 12h14" />
+                    <path d="m12 5 7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+              <div id="dashboard-proj-scope-bar" class="proj-scope-bar">
+                <span id="dashboard-proj-scope-pill" class="pill pill-muted">Apenas reservas</span>
+                <label id="dashboard-proj-daily-toggle" class="checkbox-inline hidden">
+                  <input type="checkbox" id="chk-proj-include-daily" />
+                  <span>Incluir conta diária</span>
+                </label>
+              </div>
+              <div id="dashboard-cdi-projection" class="mt-12">
+                <!-- Renderizado via financeUI.js -->
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <!-- ==================== 02. FLUXO MENSAL (DESPESAS & RENDAS) ==================== -->
+        <section id="view-flow" class="view-section" aria-label="Despesas e Rendas">
+          <div class="section-header-bar">
+            <p class="section-lead">
+              Controle completo de rendas, contas fixas (com Passagens automático), parcelamentos e gastos avulsos do mês.
+            </p>
+            <div class="year-switcher">
+              <button type="button" id="btn-flow-prev-month" class="btn btn-icon btn-sm" aria-label="Mês anterior">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m15 18-6-6 6-6" />
+                </svg>
+              </button>
+              <strong id="flow-month-label" class="month-switcher-label">Novembro 2026</strong>
+              <button type="button" id="btn-flow-next-month" class="btn btn-icon btn-sm" aria-label="Próximo mês">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Resumo Compacto no Topo -->
+          <div id="flow-summary-strip" class="flow-summary-strip">
+            <!-- Renderizado via financeUI.js -->
+          </div>
+
+          <!-- Card de Rendas -->
+          <section class="card mt-18" aria-labelledby="flow-income-title">
+            <div class="card-header-block">
+              <span class="micro-label">ENTRADAS DO MÊS</span>
+              <h2 id="flow-income-title" class="card-title serif-heading-sm">Rendas</h2>
+            </div>
+
+            <div class="flow-income-grid mt-12">
+              <form id="form-flow-base-income" class="flow-base-income-box" autocomplete="off">
+                <div class="flow-base-income-top">
+                  <div>
+                    <span class="micro-label">BOLSA / RENDA MENSAL FIXA</span>
+                    <p class="helper-text">Valor líquido mensal fixo (já incluindo VT, se aplicável).</p>
+                  </div>
+                  <button
+                    type="button"
+                    id="btn-toggle-base-income-received"
+                    class="pill-toggle is-pending"
+                    aria-pressed="false"
+                    title="Alternar status da renda fixa neste mês"
+                  >
+                    A receber
+                  </button>
+                </div>
+                <div class="inline-form">
+                  <div class="input-prefix-group">
+                    <span class="input-prefix">R$</span>
+                    <input
+                      type="text"
+                      id="input-flow-base-income"
+                      inputmode="decimal"
+                      placeholder="0,00"
+                      aria-label="Bolsa ou renda mensal fixa em reais"
+                    />
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
+                </div>
+              </form>
+
+              <div class="flow-extras-box">
+                <div class="flow-extras-header">
+                  <div class="flow-extras-header-left">
+                    <span class="micro-label">RENDAS EXTRAS NO MÊS</span>
+                    <strong id="flow-extras-total" class="money text-success">R$ 0,00</strong>
+                  </div>
+                  <button type="button" id="btn-add-extra-income" class="btn btn-outline btn-sm">
+                    + Renda Extra
+                  </button>
+                </div>
+                <div id="flow-extras-list" class="finance-list">
+                  <!-- Renderizado via financeUI.js -->
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Filtro Segmentado dos 3 Blocos de Despesas -->
+          <div class="flow-tabs-bar mt-18">
+            <div class="theme-segmented" role="group" aria-label="Filtrar blocos de despesas">
+              <button type="button" class="theme-seg-btn is-active" data-flow-tab="all" aria-pressed="true">
+                Todos os Blocos
+              </button>
+              <button type="button" class="theme-seg-btn" data-flow-tab="fixed" aria-pressed="false">
+                Contas Fixas
+              </button>
+              <button type="button" class="theme-seg-btn" data-flow-tab="installments" aria-pressed="false">
+                Parcelamentos
+              </button>
+              <button type="button" class="theme-seg-btn" data-flow-tab="variable" aria-pressed="false">
+                Avulsos
+              </button>
+            </div>
+          </div>
+
+          <div class="stack-col mt-12">
+            <!-- Bloco 1: Contas Fixas / Recorrentes (+ Passagens Automático) -->
+            <section id="flow-block-fixed" class="card" aria-labelledby="flow-fixed-title">
+              <div class="card-header-row">
+                <div>
+                  <span class="micro-label">BLOCO 01 • RECORRENTES</span>
+                  <h2 id="flow-fixed-title" class="card-title serif-heading-sm">Contas Fixas &amp; Passagens</h2>
+                </div>
+                <div class="card-header-actions">
+                  <span id="flow-fixed-total" class="pill pill-info money">R$ 0,00</span>
+                  <button type="button" id="btn-add-fixed" class="btn btn-outline btn-sm">+ Conta Fixa</button>
+                </div>
+              </div>
+              <div id="flow-fixed-list" class="finance-list mt-12">
+                <!-- Renderizado via financeUI.js -->
+              </div>
+            </section>
+
+            <!-- Bloco 2: Dívidas e Parcelamentos -->
+            <section id="flow-block-installments" class="card" aria-labelledby="flow-inst-title">
+              <div class="card-header-row">
+                <div>
+                  <span class="micro-label">BLOCO 02 • PROJEÇÃO MENSAL</span>
+                  <h2 id="flow-inst-title" class="card-title serif-heading-sm">Dívidas e Parcelamentos</h2>
+                </div>
+                <div class="card-header-actions">
+                  <span id="flow-installments-total" class="pill pill-info money">R$ 0,00</span>
+                  <button type="button" id="btn-add-installment" class="btn btn-outline btn-sm">+ Parcelamento</button>
+                </div>
+              </div>
+              <div id="flow-installments-list" class="finance-list mt-12">
+                <!-- Renderizado via financeUI.js -->
+              </div>
+            </section>
+
+            <!-- Bloco 3: Gastos Avulsos -->
+            <section id="flow-block-variable" class="card" aria-labelledby="flow-var-title">
+              <div class="card-header-row">
+                <div>
+                  <span class="micro-label">BLOCO 03 • DIA A DIA</span>
+                  <h2 id="flow-var-title" class="card-title serif-heading-sm">Gastos Avulsos</h2>
+                </div>
+                <div class="card-header-actions">
+                  <span id="flow-variable-total" class="pill pill-info money">R$ 0,00</span>
+                  <button type="button" class="btn btn-outline btn-sm" data-open-quick-expense>+ Novo Gasto</button>
+                </div>
+              </div>
+
+              <div class="variable-filters-row mt-12">
+                <label for="filter-variable-category" class="sr-only">Filtrar por categoria</label>
+                <select id="filter-variable-category" class="select-compact">
+                  <option value="all" selected>Todas as categorias</option>
+                </select>
+                <label for="input-variable-search" class="sr-only">Buscar gasto por descrição</label>
+                <input
+                  type="search"
+                  id="input-variable-search"
+                  class="search-input-compact"
+                  placeholder="Buscar por descrição..."
+                />
+              </div>
+
+              <div id="flow-variable-list" class="finance-list mt-12">
+                <!-- Renderizado via financeUI.js -->
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <!-- ==================== 03. RESERVAS (CAIXINHAS CDI) ==================== -->
+        <section id="view-caixinhas" class="view-section" aria-label="Caixinhas CDI">
+          <div class="section-header-bar">
+            <div class="caixinhas-rate-banner">
+              <span class="section-lead">
+                Rendimento composto 100% offline em dias úteis nacionais (252 d.u./ano) •
+                <span class="nowrap-inline">
+                  Taxa CDI: <strong id="caixinhas-cdi-rate-label" class="money">10,65% a.a.</strong>
+                </span>
+              </span>
+              <button type="button" id="btn-goto-cdi-config" class="btn-link nowrap-inline">
+                Alterar taxa
+              </button>
+            </div>
+            <button type="button" id="btn-new-caixinha" class="btn btn-primary btn-sm">
+              + Nova Caixinha
+            </button>
+          </div>
+
+          <div id="caixinhas-summary-kpis" class="balance-metrics-grid">
+            <!-- Renderizado via financeUI.js -->
+          </div>
+
+          <div id="caixinhas-grid" class="caixinhas-grid mt-18">
+            <!-- Renderizado via financeUI.js -->
+          </div>
+        </section>
+
+        <!-- ==================== 04. VISÃO MENSAL (TRANSPORTE) ==================== -->
+        <section id="view-monthly" class="view-section" aria-label="Visão Mensal">
+          <!-- Card de Saldo estilo Bilhete de Transporte -->
+          <section class="card balance-strip ticket-card" aria-labelledby="balance-heading">
+            <div class="ticket-stub">
+              <div class="ticket-stub-top">
+                <span class="micro-label">BILHETE • SALDO DO CARTÃO</span>
+                <h2 id="balance-heading" class="ticket-title">Saldo Atual do Cartão</h2>
+                <p id="balance-updated-at" class="muted-text">Ainda não atualizado</p>
+              </div>
+
+              <form id="form-card-balance" class="balance-form" autocomplete="off">
+                <label for="input-card-balance" class="sr-only">Saldo atual em reais</label>
+                <div class="input-prefix-group input-prefix-ticket">
+                  <span class="input-prefix">R$</span>
+                  <input
+                    type="text"
+                    id="input-card-balance"
+                    inputmode="decimal"
+                    placeholder="0,00"
+                    aria-label="Saldo atual no cartão em reais"
+                  />
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">Atualizar</button>
+              </form>
+
+              <div class="balance-strip-footer">
+                <label class="checkbox-inline">
+                  <input type="checkbox" id="chk-include-today" checked />
+                  <span>Incluir hoje na projeção (desmarque se já passou a roleta)</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="ticket-perforation" aria-hidden="true"></div>
+
+            <div class="ticket-body">
+              <div id="balance-metrics" class="balance-metrics-grid">
+                <!-- Renderizado via ui.js -->
+              </div>
+            </div>
+          </section>
+
+          <!-- Grade Principal (Bento Grid): Calendário + Painel de Métricas -->
+          <div class="monthly-layout">
+            <!-- Coluna do Calendário -->
+            <div class="calendar-column">
+              <section class="card calendar-card" aria-label="Calendário interativo de gastos">
+                <!-- Controles de Mês/Ano -->
+                <div class="calendar-toolbar">
+                  <div class="month-picker">
+                    <button
+                      type="button"
+                      id="btn-prev-month"
+                      class="btn btn-icon btn-sm"
+                      aria-label="Mês anterior"
+                      title="Mês anterior"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m15 18-6-6 6-6" />
+                      </svg>
+                    </button>
+
+                    <label for="select-month" class="sr-only">Mês</label>
+                    <select id="select-month" class="select-compact"></select>
+
+                    <label for="select-year" class="sr-only">Ano</label>
+                    <select id="select-year" class="select-compact"></select>
+
+                    <button
+                      type="button"
+                      id="btn-next-month"
+                      class="btn btn-icon btn-sm"
+                      aria-label="Próximo mês"
+                      title="Próximo mês"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m9 18 6-6-6-6" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Modo de Interação do Calendário (Segmented Control) -->
+                  <div class="interaction-controls">
+                    <div class="mode-group" role="group" aria-label="Modo de clique no calendário">
+                      <button
+                        type="button"
+                        class="mode-btn is-active"
+                        data-click-mode="popover"
+                        title="Abrir menu ao clicar no dia"
+                      >
+                        Menu
+                      </button>
+                      <button
+                        type="button"
+                        class="mode-btn"
+                        data-click-mode="nao_gastei"
+                        title="Clique rápido: marcar como Não gastei (R$ 0)"
+                      >
+                        Não gastei
+                      </button>
+                      <button
+                        type="button"
+                        class="mode-btn"
+                        data-click-mode="meia_viagem"
+                        title="Clique rápido: marcar como Meia viagem (50%)"
+                      >
+                        Meia (50%)
+                      </button>
+                      <button
+                        type="button"
+                        class="mode-btn"
+                        data-click-mode="normal"
+                        title="Clique rápido: restaurar dia para Normal"
+                      >
+                        Normal
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      id="btn-toggle-range-mode"
+                      class="btn btn-outline btn-sm"
+                      aria-pressed="false"
+                    >
+                      <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M8 2v4" />
+                        <path d="M16 2v4" />
+                        <rect width="18" height="18" x="3" y="4" rx="2" />
+                        <path d="M3 10h18" />
+                        <path d="M8 14h8" />
+                      </svg>
+                      <span>Intervalo</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Dica contextual do modo ativo -->
+                <div id="calendar-mode-hint" class="mode-hint hidden" role="status"></div>
+
+                <!-- Painel de Seletor de Intervalo Personalizado -->
+                <div id="range-panel" class="range-panel hidden" aria-label="Intervalo personalizado">
+                  <div class="range-panel-top">
+                    <strong class="range-panel-title">Intervalo Personalizado</strong>
+                    <div class="range-inputs">
+                      <label class="range-input-label">
+                        <span>De</span>
+                        <input type="date" id="input-range-start" />
+                      </label>
+                      <label class="range-input-label">
+                        <span>Até</span>
+                        <input type="date" id="input-range-end" />
+                      </label>
+                      <button type="button" id="btn-clear-range" class="btn btn-ghost btn-sm">
+                        Limpar
+                      </button>
+                    </div>
+                  </div>
+                  <div id="range-summary-content" class="range-summary-content">
+                    Clique na data inicial e na data final no calendário (pode trocar de mês) ou informe as datas acima.
+                  </div>
+                </div>
+
+                <!-- Cabeçalho dos Dias da Semana -->
+                <div class="calendar-weekdays" aria-hidden="true">
+                  <span>Dom</span>
+                  <span>Seg</span>
+                  <span>Ter</span>
+                  <span>Qua</span>
+                  <span>Qui</span>
+                  <span>Sex</span>
+                  <span>Sáb</span>
+                </div>
+
+                <!-- Grade de Dias -->
+                <div id="calendar-grid" class="calendar-grid" role="grid" aria-label="Dias do mês">
+                  <!-- Renderizado via ui.js -->
+                </div>
+
+                <!-- Legenda Discreta -->
+                <div class="calendar-legend" aria-label="Legenda dos estados do calendário">
+                  <span class="legend-item"><i class="dot dot-normal"></i> Normal</span>
+                  <span class="legend-item"><i class="dot dot-holiday"></i> Feriado</span>
+                  <span class="legend-item"><i class="dot dot-zero"></i> Não gastei</span>
+                  <span class="legend-item"><i class="dot dot-half"></i> Meia (50%)</span>
+                  <span class="legend-item"><i class="dot dot-custom"></i> Personalizado</span>
+                  <span class="legend-item"><i class="dot dot-range"></i> Intervalo</span>
+                </div>
+              </section>
+            </div>
+
+            <!-- Coluna Lateral: Painel de Resumo e Métricas -->
+            <aside class="summary-column" aria-label="Resumo e métricas do mês">
+              <!-- Resumo Mensal e Compensação -->
+              <section class="card summary-card">
+                <div class="card-header-row">
+                  <div>
+                    <span class="micro-label">RESUMO MENSAL</span>
+                    <h2 id="monthly-summary-title" class="card-title serif-heading">Resumo do Mês</h2>
+                  </div>
+                  <span id="monthly-active-days-badge" class="pill pill-info">0 dias</span>
+                </div>
+
+                <div id="monthly-kpis" class="kpi-stack">
+                  <!-- Renderizado via ui.js -->
+                </div>
+
+                <!-- Recarga Efetiva do Mês (opcional) -->
+                <div class="recharge-box">
+                  <div class="recharge-box-header">
+                    <label for="input-monthly-recharge" class="recharge-label">
+                      Recarga efetiva neste mês <span class="muted-text">(opcional)</span>
+                    </label>
+                    <button
+                      type="button"
+                      id="btn-clear-monthly-recharge"
+                      class="btn-link hidden"
+                      title="Voltar a usar o valor previsto automaticamente"
+                    >
+                      Remover
+                    </button>
+                  </div>
+                  <form id="form-monthly-recharge" class="inline-form" autocomplete="off">
+                    <div class="input-prefix-group">
+                      <span class="input-prefix">R$</span>
+                      <input
+                        type="text"
+                        id="input-monthly-recharge"
+                        inputmode="decimal"
+                        placeholder="Auto (previsto)"
+                      />
+                    </div>
+                    <button type="submit" class="btn btn-outline btn-sm">Salvar</button>
+                  </form>
+                  <p id="monthly-carry-info" class="helper-text"></p>
+                </div>
+              </section>
+
+              <!-- Economias, Médias e Visão Rápida do Ano -->
+              <section class="card summary-card">
+                <div class="card-header-block">
+                  <span class="micro-label">INDICADORES</span>
+                  <h2 class="card-title serif-heading-sm">Economia e Métricas Extras</h2>
+                </div>
+                <div id="extra-metrics" class="metrics-list">
+                  <!-- Renderizado via ui.js -->
+                </div>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ==================== 2. VISÃO ANUAL ==================== -->
+        <section id="view-annual" class="view-section" aria-label="Visão Anual">
+          <div class="section-header-bar">
+            <p class="section-lead">
+              Comparativo dos 12 meses com compensação encadeada. Clique em qualquer mês para abrir o calendário.
+            </p>
+            <div class="year-switcher">
+              <button type="button" id="btn-annual-prev-year" class="btn btn-icon btn-sm" aria-label="Ano anterior">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m15 18-6-6 6-6" />
+                </svg>
+              </button>
+              <strong id="annual-year-label" class="year-label">2026</strong>
+              <button type="button" id="btn-annual-next-year" class="btn btn-icon btn-sm" aria-label="Próximo ano">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div id="annual-kpis" class="annual-kpi-grid">
+            <!-- Renderizado via ui.js -->
+          </div>
+
+          <!-- Gráfico de Barras em CSS Puro -->
+          <section class="card chart-card" aria-labelledby="annual-chart-title">
+            <div class="card-header-row">
+              <div>
+                <span class="micro-label">EVOLUÇÃO MENSAL</span>
+                <h3 id="annual-chart-title" class="card-title serif-heading-sm">Gasto Real vs. Previsto por Mês</h3>
+              </div>
+              <div class="chart-legend">
+                <span class="legend-item"><i class="dot dot-normal"></i> Real / Ajustado</span>
+                <span class="legend-item"><i class="dot dot-predicted"></i> Previsto base</span>
+              </div>
+            </div>
+            <div id="annual-chart" class="css-bar-chart">
+              <!-- Renderizado via ui.js -->
+            </div>
+          </section>
+
+          <!-- Tabela Anual -->
+          <section class="card table-card" aria-label="Tabela mensal do ano">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Mês</th>
+                    <th class="num">Previsto Base</th>
+                    <th class="num">Total Bruto (Real)</th>
+                    <th class="num">Economia</th>
+                    <th class="num">Compensação</th>
+                    <th class="num">Líquido Necessário</th>
+                  </tr>
+                </thead>
+                <tbody id="annual-table-body">
+                  <!-- Renderizado via ui.js -->
+                </tbody>
+                <tfoot id="annual-table-foot">
+                  <!-- Renderizado via ui.js -->
+                </tfoot>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <!-- ==================== 3. TARIFAS E HISTÓRICO ==================== -->
+        <section id="view-fares" class="view-section" aria-label="Tarifas e Histórico de Vigências">
+          <div class="section-header-bar">
+            <p class="section-lead">
+              Cada tabela vale a partir da sua data de início. Reajustes no meio do ano preservam automaticamente os meses anteriores.
+            </p>
+          </div>
+
+          <div class="two-col-layout">
+            <!-- Formulário de Vigência -->
+            <section class="card">
+              <div class="card-header-row">
+                <div>
+                  <span class="micro-label">CADASTRO DE TARIFA</span>
+                  <h3 id="fare-form-title" class="card-title serif-heading-sm">Nova Vigência / Reajuste</h3>
+                </div>
+                <button type="button" id="btn-cancel-fare-edit" class="btn-link hidden">
+                  Cancelar edição
+                </button>
+              </div>
+
+              <form id="form-fare-schedule" class="stacked-form" autocomplete="off">
+                <input type="hidden" id="input-fare-id" value="" />
+
+                <div class="form-row-2">
+                  <div class="form-field">
+                    <label for="input-fare-label">Descrição / Nome</label>
+                    <input
+                      type="text"
+                      id="input-fare-label"
+                      placeholder="Ex.: Reajuste Janeiro 2026"
+                      maxlength="80"
+                      required
+                    />
+                  </div>
+                  <div class="form-field">
+                    <label for="input-fare-date">Início da vigência</label>
+                    <input type="date" id="input-fare-date" required />
+                  </div>
+                </div>
+
+                <div class="weekday-group-block">
+                  <div class="weekdays-header-row">
+                    <span class="form-subtitle">Dias úteis (Seg a Sex — ida + volta)</span>
+                    <button type="button" id="btn-copy-mon-to-weekdays" class="btn-link">
+                      Copiar Segunda para Seg–Sex
+                    </button>
+                  </div>
+
+                  <div class="weekdays-work-grid">
+                    <label class="weekday-field">
+                      <span>Segunda</span>
+                      <div class="input-prefix-group">
+                        <span class="input-prefix">R$</span>
+                        <input type="text" id="fare-day-1" inputmode="decimal" value="9,40" required />
+                      </div>
+                    </label>
+                    <label class="weekday-field">
+                      <span>Terça</span>
+                      <div class="input-prefix-group">
+                        <span class="input-prefix">R$</span>
+                        <input type="text" id="fare-day-2" inputmode="decimal" value="9,40" required />
+                      </div>
+                    </label>
+                    <label class="weekday-field">
+                      <span>Quarta</span>
+                      <div class="input-prefix-group">
+                        <span class="input-prefix">R$</span>
+                        <input type="text" id="fare-day-3" inputmode="decimal" value="9,40" required />
+                      </div>
+                    </label>
+                    <label class="weekday-field">
+                      <span>Quinta</span>
+                      <div class="input-prefix-group">
+                        <span class="input-prefix">R$</span>
+                        <input type="text" id="fare-day-4" inputmode="decimal" value="9,40" required />
+                      </div>
+                    </label>
+                    <label class="weekday-field">
+                      <span>Sexta</span>
+                      <div class="input-prefix-group">
+                        <span class="input-prefix">R$</span>
+                        <input type="text" id="fare-day-5" inputmode="decimal" value="9,40" required />
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="weekday-group-block">
+                  <div class="weekdays-header-row">
+                    <span class="form-subtitle">Fim de semana (Sáb e Dom)</span>
+                  </div>
+
+                  <div class="weekdays-weekend-grid">
+                    <label class="weekday-field">
+                      <span>Sábado</span>
+                      <div class="input-prefix-group">
+                        <span class="input-prefix">R$</span>
+                        <input type="text" id="fare-day-6" inputmode="decimal" value="0,00" required />
+                      </div>
+                    </label>
+                    <label class="weekday-field">
+                      <span>Domingo</span>
+                      <div class="input-prefix-group">
+                        <span class="input-prefix">R$</span>
+                        <input type="text" id="fare-day-0" inputmode="decimal" value="0,00" required />
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <button type="submit" id="btn-save-fare" class="btn btn-primary">
+                    Salvar vigência
+                  </button>
+                </div>
+              </form>
+            </section>
+
+            <!-- Lista de Vigências -->
+            <section class="card">
+              <div class="card-header-block">
+                <span class="micro-label">LINHA DO TEMPO</span>
+                <h3 class="card-title serif-heading-sm">Histórico de Tarifas Cadastradas</h3>
+              </div>
+              <div id="fare-schedules-list" class="schedules-list">
+                <!-- Renderizado via ui.js -->
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <!-- ==================== 4. FERIADOS ==================== -->
+        <section id="view-holidays" class="view-section" aria-label="Motor de Feriados Offline">
+          <div class="section-header-bar">
+            <p class="section-lead">
+              Cálculo 100% offline para Brasil + Rio de Janeiro (incluindo datas móveis como Carnaval, Páscoa e Corpus Christi).
+            </p>
+            <div class="year-switcher">
+              <button type="button" id="btn-holidays-prev-year" class="btn btn-icon btn-sm" aria-label="Ano anterior">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m15 18-6-6 6-6" />
+                </svg>
+              </button>
+              <strong id="holidays-year-label" class="year-label">2026</strong>
+              <button type="button" id="btn-holidays-next-year" class="btn btn-icon btn-sm" aria-label="Próximo ano">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="two-col-layout">
+            <!-- Feriados Embutidos -->
+            <section class="card">
+              <div class="card-header-row">
+                <div>
+                  <span class="micro-label">CALENDÁRIO OFICIAL</span>
+                  <h3 class="card-title serif-heading-sm">Feriados Nacionais + Rio de Janeiro</h3>
+                </div>
+                <span id="holidays-builtin-count" class="pill pill-info">0 ativos</span>
+              </div>
+              <p class="helper-text mb-12">
+                Ative/desative com 1 clique, edite o nome ou altere o efeito (ex.: Quarta-feira de Cinzas como Meia viagem 50% ou Feriado R$ 0).
+              </p>
+              <div id="builtin-holidays-list" class="holidays-list">
+                <!-- Renderizado via ui.js -->
+              </div>
+            </section>
+
+            <!-- Feriados Manuais, Emendas e Férias -->
+            <div class="stack-col">
+              <section class="card">
+                <div class="card-header-row">
+                  <div>
+                    <span class="micro-label">EVENTO PERSONALIZADO</span>
+                    <h3 id="custom-holiday-form-title" class="card-title serif-heading-sm">Adicionar Feriado, Emenda ou Férias</h3>
+                  </div>
+                  <button type="button" id="btn-cancel-holiday-edit" class="btn-link hidden">
+                    Cancelar edição
+                  </button>
+                </div>
+
+                <form id="form-custom-holiday" class="stacked-form" autocomplete="off">
+                  <input type="hidden" id="input-custom-holiday-id" value="" />
+
+                  <div class="form-field">
+                    <label for="input-custom-holiday-name">Nome</label>
+                    <input
+                      type="text"
+                      id="input-custom-holiday-name"
+                      placeholder="Ex.: Emenda Corpus Christi ou Férias"
+                      maxlength="80"
+                      required
+                    />
+                  </div>
+
+                  <div class="form-row-2">
+                    <div class="form-field">
+                      <label for="input-custom-holiday-start">Data inicial</label>
+                      <input type="date" id="input-custom-holiday-start" required />
+                    </div>
+                    <div class="form-field">
+                      <label for="input-custom-holiday-end">Data final <span class="muted-text">(opcional)</span></label>
+                      <input type="date" id="input-custom-holiday-end" />
+                    </div>
+                  </div>
+
+                  <div class="form-row-2">
+                    <div class="form-field">
+                      <label for="select-custom-holiday-category">Categoria</label>
+                      <select id="select-custom-holiday-category">
+                        <option value="Emenda">Emenda / Ponto Facultativo</option>
+                        <option value="Férias / Recesso">Férias / Recesso</option>
+                        <option value="Feriado Municipal">Feriado Municipal</option>
+                        <option value="Manual">Outro / Manual</option>
+                      </select>
+                    </div>
+                    <div class="form-field">
+                      <label for="select-custom-holiday-effect">Efeito na tarifa</label>
+                      <select id="select-custom-holiday-effect">
+                        <option value="zero">Sem gasto (R$ 0,00)</option>
+                        <option value="meia_viagem">Meia viagem (50%)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Salvar evento</button>
+                  </div>
+                </form>
+              </section>
+
+              <section class="card">
+                <div class="card-header-row">
+                  <div>
+                    <span class="micro-label">AGENDA PESSOAL</span>
+                    <h3 class="card-title serif-heading-sm">Meus Feriados, Emendas e Recessos</h3>
+                  </div>
+                  <span id="holidays-custom-count" class="pill pill-muted">0 itens</span>
+                </div>
+                <div id="custom-holidays-list" class="holidays-list">
+                  <!-- Renderizado via ui.js -->
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 5. BACKUP E CONFIGURAÇÕES ==================== -->
+        <section id="view-backup" class="view-section" aria-label="Backup e Configurações">
+          <div class="section-header-bar">
+            <p class="section-lead">
+              Seus dados ficam armazenados apenas neste navegador (<code>calc_passagens_v1</code>). Exporte backups periodicamente para trocar de aparelho com segurança.
+            </p>
+          </div>
+
+          <div class="two-col-layout">
+            <!-- Parâmetros Financeiros + Preferências -->
+            <div class="stack-col">
+              <section class="card">
+                <div class="card-header-block">
+                  <span class="micro-label">FINANCEIRO</span>
+                  <h3 class="card-title serif-heading-sm">Parâmetros Financeiros</h3>
+                </div>
+
+                <form id="form-finance-params" class="stacked-form mt-12" autocomplete="off">
+                  <div class="form-row-2">
+                    <div class="form-field">
+                      <label for="input-config-base-income">Bolsa / Renda Mensal Fixa</label>
+                      <div class="input-prefix-group">
+                        <span class="input-prefix">R$</span>
+                        <input
+                          type="text"
+                          id="input-config-base-income"
+                          inputmode="decimal"
+                          placeholder="0,00"
+                        />
+                      </div>
+                    </div>
+                    <div class="form-field">
+                      <label for="input-config-cdi-rate">Taxa CDI anual (% a.a.)</label>
+                      <div class="input-prefix-group">
+                        <input
+                          type="text"
+                          id="input-config-cdi-rate"
+                          inputmode="decimal"
+                          placeholder="10,65"
+                        />
+                        <span class="input-suffix">%</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="helper-text">
+                    A taxa CDI anual é usada em todas as Caixinhas CDI (juros compostos em 252 dias úteis/ano, sem cálculo de IR).
+                  </p>
+                  <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-sm">Salvar parâmetros</button>
+                  </div>
+                </form>
+              </section>
+
+              <section class="card">
+                <div class="card-header-block">
+                  <span class="micro-label">PREFERÊNCIAS</span>
+                  <h3 class="card-title serif-heading-sm">Preferências da Interface</h3>
+                </div>
+
+              <div class="setting-row setting-row-stack">
+                <div>
+                  <strong>Tema visual</strong>
+                  <p class="muted-text">Escolha entre tema claro, escuro ou seguir o sistema.</p>
+                </div>
+                <div class="theme-segmented" role="group" aria-label="Preferência de tema visual">
+                  <button type="button" class="theme-seg-btn" data-theme-pref="light" aria-pressed="false">
+                    Claro
+                  </button>
+                  <button type="button" class="theme-seg-btn" data-theme-pref="dark" aria-pressed="false">
+                    Escuro
+                  </button>
+                  <button type="button" class="theme-seg-btn is-active" data-theme-pref="auto" aria-pressed="true">
+                    Sistema
+                  </button>
+                </div>
+              </div>
+
+              <div class="setting-row setting-row-column">
+                <div>
+                  <strong>Paleta de Cores</strong>
+                  <p class="muted-text">Combina automaticamente com o modo claro e o modo escuro.</p>
+                </div>
+
+                <div class="palette-grid" role="group" aria-label="Selecionar paleta de cores">
+                  <button type="button" class="palette-card is-active" data-palette-choice="floresta" aria-pressed="true">
+                    <span class="palette-swatches" aria-hidden="true">
+                      <i style="background: #f3efe6;"></i>
+                      <i style="background: #263529;"></i>
+                      <i style="background: #b45a2d;"></i>
+                    </span>
+                    <span class="palette-info">
+                      <strong>Floresta</strong>
+                      <small>Papel creme &amp; sálvia</small>
+                    </span>
+                  </button>
+
+                  <button type="button" class="palette-card" data-palette-choice="editorial" aria-pressed="false">
+                    <span class="palette-swatches" aria-hidden="true">
+                      <i style="background: #f4f1ea;"></i>
+                      <i style="background: #1d1e1c;"></i>
+                      <i style="background: #6f7c4a;"></i>
+                    </span>
+                    <span class="palette-info">
+                      <strong>Editorial</strong>
+                      <small>Carvão &amp; oliva quente</small>
+                    </span>
+                  </button>
+
+                  <button type="button" class="palette-card" data-palette-choice="ardosia" aria-pressed="false">
+                    <span class="palette-swatches" aria-hidden="true">
+                      <i style="background: #f3f5f8;"></i>
+                      <i style="background: #181e29;"></i>
+                      <i style="background: #2f5fd0;"></i>
+                    </span>
+                    <span class="palette-info">
+                      <strong>Ardósia</strong>
+                      <small>Gelo limpo &amp; cobalto</small>
+                    </span>
+                  </button>
+
+                  <button type="button" class="palette-card" data-palette-choice="cafe" aria-pressed="false">
+                    <span class="palette-swatches" aria-hidden="true">
+                      <i style="background: #f4eee6;"></i>
+                      <i style="background: #2c1f1a;"></i>
+                      <i style="background: #b56c2f;"></i>
+                    </span>
+                    <span class="palette-info">
+                      <strong>Café</strong>
+                      <small>Areia &amp; espresso</small>
+                    </span>
+                  </button>
+
+                  <button type="button" class="palette-card" data-palette-choice="ameixa" aria-pressed="false">
+                    <span class="palette-swatches" aria-hidden="true">
+                      <i style="background: #f4f1f6;"></i>
+                      <i style="background: #2b1e33;"></i>
+                      <i style="background: #775596;"></i>
+                    </span>
+                    <span class="palette-info">
+                      <strong>Ameixa</strong>
+                      <small>Marfim &amp; berinjela</small>
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div>
+                  <strong>Incluir hoje na projeção do saldo</strong>
+                  <p class="muted-text">
+                    Quando ativado, o gasto previsto de hoje conta na autonomia do cartão e na recarga restante do mês.
+                  </p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="chk-include-today-settings" checked />
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+
+              <div class="storage-summary" id="storage-stats">
+                <!-- Renderizado via ui.js -->
+              </div>
+              </section>
+            </div>
+
+            <!-- Exportação, Importação e Reset -->
+            <section class="card">
+              <div class="card-header-block">
+                <span class="micro-label">PORTABILIDADE</span>
+                <h3 class="card-title serif-heading-sm">Backup em JSON</h3>
+              </div>
+
+              <div class="backup-block">
+                <p class="muted-text">
+                  Baixe um arquivo <code>.json</code> completo (v2) contendo finanças pessoais, contas fixas, parcelamentos, gastos avulsos, caixinhas CDI e todo o histórico de Passagens.
+                </p>
+                <button type="button" id="btn-export-json" class="btn btn-primary">
+                  <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" x2="12" y1="15" y2="3" />
+                  </svg>
+                  <span>Baixar backup (.json)</span>
+                </button>
+              </div>
+
+              <hr class="divider" />
+
+              <div class="backup-block">
+                <p class="muted-text">
+                  Restaure um arquivo <code>.json</code> previamente exportado (compatível com backups antigos <code>v1</code> e novos <code>v2</code>).
+                </p>
+                <label for="input-import-json" class="btn btn-outline file-btn">
+                  <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" x2="12" y1="3" y2="15" />
+                  </svg>
+                  <span>Selecionar arquivo de backup (.json)</span>
+                </label>
+                <input type="file" id="input-import-json" accept="application/json,.json" class="sr-only" />
+                <div id="import-preview-box" class="import-preview hidden"></div>
+              </div>
+
+              <hr class="divider" />
+
+              <div class="backup-block danger-zone danger-zone-box">
+                <div>
+                  <strong>Resetar todos os dados</strong>
+                  <p class="muted-text">
+                    Apaga rendas, despesas, caixinhas, exceções, histórico de tarifas, saldo e feriados manuais, restaurando os valores iniciais.
+                  </p>
+                </div>
+                <button type="button" id="btn-reset-all" class="btn btn-danger">
+                  Resetar dados
+                </button>
+              </div>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL / POPOVER DO DIA ==================== -->
+  <div id="day-modal-backdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="day-modal-title">
+    <div class="modal-dialog" id="day-modal-dialog">
+      <div class="modal-header">
+        <div>
+          <span class="micro-label">AJUSTE DIÁRIO</span>
+          <h3 id="day-modal-title" class="modal-title serif-heading-sm">Dia selecionado</h3>
+          <p id="day-modal-subtitle" class="muted-text"></p>
+        </div>
+        <button type="button" id="btn-close-day-modal" class="btn btn-icon btn-sm" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div id="day-modal-holiday-banner" class="holiday-banner hidden"></div>
+
+      <div class="modal-body">
+        <div class="quick-actions-grid">
+          <button type="button" class="quick-choice-btn" data-day-action="normal" id="btn-day-normal">
+            <strong id="btn-day-normal-label">Normal</strong>
+            <span id="btn-day-normal-value">R$ 0,00</span>
+          </button>
+
+          <button type="button" class="quick-choice-btn" data-day-action="nao_gastei" id="btn-day-zero">
+            <strong>Não gastei</strong>
+            <span>R$ 0,00</span>
+          </button>
+
+          <button type="button" class="quick-choice-btn" data-day-action="meia_viagem" id="btn-day-half">
+            <strong>Meia viagem</strong>
+            <span id="btn-day-half-value">R$ 0,00</span>
+          </button>
+        </div>
+
+        <form id="form-day-custom" class="stacked-form mt-12" autocomplete="off">
+          <div class="form-row-2">
+            <div class="form-field">
+              <label for="input-day-custom-value">Valor personalizado (opcional)</label>
+              <div class="input-prefix-group">
+                <span class="input-prefix">R$</span>
+                <input
+                  type="text"
+                  id="input-day-custom-value"
+                  inputmode="decimal"
+                  placeholder="Ex.: 14,10"
+                />
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="input-day-note">Nota curta (opcional)</label>
+              <input
+                type="text"
+                id="input-day-note"
+                placeholder="Ex.: home office, carona"
+                maxlength="120"
+              />
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" id="btn-day-clear-exception" class="btn btn-ghost btn-sm hidden">
+              Limpar exceção
+            </button>
+            <div class="modal-footer-right">
+              <button type="button" id="btn-day-save-note" class="btn btn-outline btn-sm">
+                Salvar nota
+              </button>
+              <button type="submit" class="btn btn-primary btn-sm">
+                Aplicar valor
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL DE EDIÇÃO DE FERIADO EMBUTIDO ==================== -->
+  <div id="builtin-holiday-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="builtin-modal-title">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <div>
+          <span class="micro-label">CALENDÁRIO OFICIAL</span>
+          <h3 id="builtin-modal-title" class="modal-title serif-heading-sm">Editar Feriado</h3>
+        </div>
+        <button type="button" id="btn-close-builtin-modal" class="btn btn-icon btn-sm" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      </div>
+      <form id="form-edit-builtin-holiday" class="modal-body stacked-form" autocomplete="off">
+        <input type="hidden" id="input-builtin-key" />
+        <div class="form-field">
+          <label for="input-builtin-name">Nome de exibição</label>
+          <input type="text" id="input-builtin-name" maxlength="80" required />
+        </div>
+        <div class="form-field">
+          <label for="select-builtin-effect">Efeito quando ativo</label>
+          <select id="select-builtin-effect">
+            <option value="zero">Feriado completo (R$ 0,00)</option>
+            <option value="meia_viagem">Meia viagem (50% da tarifa)</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="btn-reset-builtin-name" class="btn btn-ghost btn-sm">
+            Restaurar padrão
+          </button>
+          <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: LANÇAMENTO RÁPIDO (+ NOVO GASTO / TECLA N) ==================== -->
+  <div id="quick-expense-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="quick-expense-modal-title">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <div>
+          <span class="micro-label">LANÇAMENTO RÁPIDO • TECLA N</span>
+          <h3 id="quick-expense-modal-title" class="modal-title serif-heading-sm">Novo Gasto Rápido</h3>
+        </div>
+        <button type="button" class="btn btn-icon btn-sm" data-close-finance-modal aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      </div>
+      <form id="form-quick-expense" class="modal-body stacked-form" autocomplete="off">
+        <input type="hidden" id="input-quick-expense-id" />
+        <div class="form-field">
+          <label for="input-quick-expense-amount">Valor</label>
+          <div class="input-prefix-group input-prefix-ticket">
+            <span class="input-prefix">R$</span>
+            <input
+              type="text"
+              id="input-quick-expense-amount"
+              inputmode="decimal"
+              placeholder="0,00"
+              required
+            />
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="input-quick-expense-desc">Descrição</label>
+          <input
+            type="text"
+            id="input-quick-expense-desc"
+            placeholder="Ex.: Almoço, farmácia, café"
+            maxlength="100"
+            required
+          />
+        </div>
+        <div class="form-row-2">
+          <div class="form-field">
+            <label for="input-quick-expense-category">Categoria</label>
+            <select id="input-quick-expense-category"></select>
+          </div>
+          <div class="form-field">
+            <label for="input-quick-expense-date">Data</label>
+            <input type="date" id="input-quick-expense-date" required />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost btn-sm" data-close-finance-modal>Cancelar</button>
+          <button type="submit" class="btn btn-primary btn-sm">Salvar gasto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: RENDA EXTRA ==================== -->
+  <div id="extra-income-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="extra-income-modal-title">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <div>
+          <span class="micro-label">ENTRADAS PONTUAIS</span>
+          <h3 id="extra-income-modal-title" class="modal-title serif-heading-sm">Nova Renda Extra</h3>
+        </div>
+        <button type="button" class="btn btn-icon btn-sm" data-close-finance-modal aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      </div>
+      <form id="form-extra-income" class="modal-body stacked-form" autocomplete="off">
+        <input type="hidden" id="input-extra-income-id" />
+        <div class="form-field">
+          <label for="input-extra-income-amount">Valor</label>
+          <div class="input-prefix-group">
+            <span class="input-prefix">R$</span>
+            <input type="text" id="input-extra-income-amount" inputmode="decimal" placeholder="0,00" required />
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="input-extra-income-desc">Descrição</label>
+          <input type="text" id="input-extra-income-desc" placeholder="Ex.: Freelance, reembolso" maxlength="100" required />
+        </div>
+        <div class="form-field">
+          <label for="input-extra-income-date">Data</label>
+          <input type="date" id="input-extra-income-date" required />
+        </div>
+        <label class="checkbox-inline">
+          <input type="checkbox" id="chk-extra-income-received" checked />
+          <span>Renda já recebida (desmarque se ainda vai cair na conta)</span>
+        </label>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost btn-sm" data-close-finance-modal>Cancelar</button>
+          <button type="submit" class="btn btn-primary btn-sm">Salvar renda</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: CONTA FIXA ==================== -->
+  <div id="fixed-expense-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="fixed-expense-modal-title">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <div>
+          <span class="micro-label">DESPESA RECORRENTE</span>
+          <h3 id="fixed-expense-modal-title" class="modal-title serif-heading-sm">Nova Conta Fixa</h3>
+        </div>
+        <button type="button" class="btn btn-icon btn-sm" data-close-finance-modal aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      </div>
+      <form id="form-fixed-expense" class="modal-body stacked-form" autocomplete="off">
+        <input type="hidden" id="input-fixed-id" />
+        <div class="form-field">
+          <label for="input-fixed-name">Nome da conta</label>
+          <input type="text" id="input-fixed-name" placeholder="Ex.: Internet, Academia, Streaming" maxlength="80" required />
+        </div>
+        <div class="form-row-2">
+          <div class="form-field">
+            <label for="input-fixed-amount">Valor mensal</label>
+            <div class="input-prefix-group">
+              <span class="input-prefix">R$</span>
+              <input type="text" id="input-fixed-amount" inputmode="decimal" placeholder="0,00" required />
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="input-fixed-dueday">Dia de vencimento</label>
+            <input type="number" id="input-fixed-dueday" min="1" max="31" value="10" required />
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-field">
+            <label for="input-fixed-category">Categoria</label>
+            <select id="input-fixed-category"></select>
+          </div>
+          <div class="form-field">
+            <label for="input-fixed-start-month">Início (mês)</label>
+            <input type="month" id="input-fixed-start-month" required />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost btn-sm" data-close-finance-modal>Cancelar</button>
+          <button type="submit" class="btn btn-primary btn-sm">Salvar conta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: PARCELAMENTO / DÍVIDA ==================== -->
+  <div id="installment-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="installment-modal-title">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <div>
+          <span class="micro-label">PARCELAMENTOS E DÍVIDAS</span>
+          <h3 id="installment-modal-title" class="modal-title serif-heading-sm">Novo Parcelamento</h3>
+        </div>
+        <button type="button" class="btn btn-icon btn-sm" data-close-finance-modal aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      </div>
+      <form id="form-installment" class="modal-body stacked-form" autocomplete="off">
+        <input type="hidden" id="input-installment-id" />
+        <div class="form-field">
+          <label for="input-installment-name">Nome da compra / dívida</label>
+          <input type="text" id="input-installment-name" placeholder="Ex.: Notebook, Celular, Empréstimo" maxlength="80" required />
+        </div>
+        <div class="form-row-2">
+          <div class="form-field">
+            <label for="input-installment-amount">Valor da parcela</label>
+            <div class="input-prefix-group">
+              <span class="input-prefix">R$</span>
+              <input type="text" id="input-installment-amount" inputmode="decimal" placeholder="0,00" required />
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="input-installment-count">Total de parcelas</label>
+            <input type="number" id="input-installment-count" min="1" max="360" value="6" required />
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-field">
+            <label for="input-installment-start-month">1ª parcela (mês)</label>
+            <input type="month" id="input-installment-start-month" required />
+          </div>
+          <div class="form-field">
+            <label for="input-installment-dueday">Dia de vencimento</label>
+            <input type="number" id="input-installment-dueday" min="1" max="31" value="10" required />
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="input-installment-category">Categoria</label>
+          <select id="input-installment-category"></select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost btn-sm" data-close-finance-modal>Cancelar</button>
+          <button type="submit" class="btn btn-primary btn-sm">Salvar parcelamento</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: NOVA / EDITAR CAIXINHA CDI ==================== -->
+  <div id="caixinha-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="caixinha-modal-title">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <div>
+          <span class="micro-label">CAIXINHA CDI</span>
+          <h3 id="caixinha-modal-title" class="modal-title serif-heading-sm">Nova Caixinha CDI</h3>
+        </div>
+        <button type="button" class="btn btn-icon btn-sm" data-close-finance-modal aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      </div>
+      <form id="form-caixinha" class="modal-body stacked-form" autocomplete="off">
+        <input type="hidden" id="input-box-id" />
+        <input type="hidden" id="input-box-kind" value="reserve" />
+        <div class="form-field">
+          <label>Papel da caixinha</label>
+          <div class="box-kind-grid" role="group" aria-label="Papel da caixinha">
+            <button type="button" class="box-kind-choice is-active" data-box-kind-choice="reserve" aria-pressed="true">
+              <strong>Reserva / Meta</strong>
+              <small>Patrimônio guardado, entra em Aportes e Projeção</small>
+            </button>
+            <button type="button" class="box-kind-choice" data-box-kind-choice="daily" aria-pressed="false">
+              <strong>Conta / Uso Diário</strong>
+              <small>Onde o salário entra e as despesas saem (CDI)</small>
+            </button>
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="input-box-name">Nome da caixinha</label>
+          <input type="text" id="input-box-name" placeholder="Ex.: Reserva de Emergência, Conta 100% CDI" maxlength="80" required />
+        </div>
+        <div class="form-row-2">
+          <div class="form-field">
+            <label for="input-box-cdi-percent">Percentual do CDI</label>
+            <div class="input-prefix-group">
+              <input type="text" id="input-box-cdi-percent" inputmode="decimal" value="100" required />
+              <span class="input-suffix">% CDI</span>
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="input-box-goal">Meta <span class="muted-text">(opcional)</span></label>
+            <div class="input-prefix-group">
+              <span class="input-prefix">R$</span>
+              <input type="text" id="input-box-goal" inputmode="decimal" placeholder="0,00" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost btn-sm" data-close-finance-modal>Cancelar</button>
+          <button type="submit" class="btn btn-primary btn-sm">Salvar caixinha</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: ATUALIZAR SALDO (CONTA / USO DIÁRIO) ==================== -->
+  <div id="caixinha-adjust-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="adjust-box-modal-title">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <div>
+          <span class="micro-label">CONTA • USO DIÁRIO</span>
+          <h3 id="adjust-box-modal-title" class="modal-title serif-heading-sm">Atualizar Saldo</h3>
+          <p id="adjust-box-modal-subtitle" class="muted-text"></p>
+        </div>
+        <button type="button" class="btn btn-icon btn-sm" data-close-finance-modal aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      </div>
+      <form id="form-caixinha-adjust" class="modal-body stacked-form" autocomplete="off">
+        <input type="hidden" id="input-adjust-box-id" />
+        <div class="adjust-current-strip">
+          <span>Saldo calculado hoje</span>
+          <strong id="adjust-box-current-balance" class="money">R$ 0,00</strong>
+        </div>
+        <div class="form-field">
+          <label for="input-adjust-box-balance">Saldo real visto no banco hoje</label>
+          <div class="input-prefix-group input-prefix-ticket">
+            <span class="input-prefix">R$</span>
+            <input
+              type="text"
+              id="input-adjust-box-balance"
+              inputmode="decimal"
+              placeholder="0,00"
+              required
+            />
+          </div>
+          <p class="helper-text">
+            A diferença será lançada automaticamente hoje como ajuste rápido de saldo (sem distorcer o gráfico de Aportes) e o CDI continuará rendendo sobre o novo saldo nos próximos dias úteis.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost btn-sm" data-close-finance-modal>Cancelar</button>
+          <button type="submit" class="btn btn-primary btn-sm">Confirmar saldo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: APORTE / RESGATE CAIXINHA ==================== -->
+  <div id="caixinha-tx-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="caixinha-tx-modal-title">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <div>
+          <span class="micro-label">MOVIMENTAÇÃO CDI</span>
+          <h3 id="caixinha-tx-modal-title" class="modal-title serif-heading-sm">Aporte</h3>
+        </div>
+        <button type="button" class="btn btn-icon btn-sm" data-close-finance-modal aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      </div>
+      <form id="form-caixinha-tx" class="modal-body stacked-form" autocomplete="off">
+        <input type="hidden" id="input-box-tx-box-id" />
+        <input type="hidden" id="input-box-tx-type" value="deposit" />
+        <div class="form-row-2">
+          <div class="form-field">
+            <label for="input-box-tx-amount">Valor</label>
+            <div class="input-prefix-group">
+              <span class="input-prefix">R$</span>
+              <input type="text" id="input-box-tx-amount" inputmode="decimal" placeholder="0,00" required />
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="input-box-tx-date">Data</label>
+            <input type="date" id="input-box-tx-date" required />
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="input-box-tx-note">Observação <span class="muted-text">(opcional)</span></label>
+          <input type="text" id="input-box-tx-note" placeholder="Ex.: Sobra do mês" maxlength="120" />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost btn-sm" data-close-finance-modal>Cancelar</button>
+          <button type="submit" id="btn-box-tx-submit" class="btn btn-primary btn-sm">Registrar aporte</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: DETALHES & PROJEÇÃO DA CAIXINHA ==================== -->
+  <div id="caixinha-detail-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="box-detail-title">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <div>
+          <span class="micro-label">DETALHES &amp; PROJEÇÃO CDI</span>
+          <h3 id="box-detail-title" class="modal-title serif-heading-sm">Caixinha</h3>
+          <p id="box-detail-subtitle" class="muted-text"></p>
+        </div>
+        <button type="button" class="btn btn-icon btn-sm" data-close-finance-modal aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body modal-body-scroll">
+        <div id="box-detail-metrics" class="balance-metrics-grid"></div>
+
+        <div class="box-sim-section mt-18">
+          <div class="box-sim-header">
+            <div>
+              <span class="micro-label">SIMULAÇÃO DE RENDIMENTO FUTURO</span>
+              <p class="helper-text">Projeção composta em dias úteis (21 / 126 / 252 d.u.), sem IR.</p>
+            </div>
+            <div class="box-sim-input-wrap">
+              <label for="input-box-sim-monthly" class="helper-text">Aporte mensal (opc.)</label>
+              <div class="input-prefix-group">
+                <span class="input-prefix">R$</span>
+                <input type="text" id="input-box-sim-monthly" inputmode="decimal" placeholder="0,00" />
+              </div>
+            </div>
+          </div>
+          <div id="box-detail-projections" class="mt-12"></div>
+        </div>
+
+        <div class="mt-18">
+          <div class="card-header-row">
+            <span class="micro-label">HISTÓRICO DE MOVIMENTAÇÕES</span>
+            <div class="card-header-actions">
+              <button type="button" id="btn-detail-deposit" class="btn btn-outline btn-sm">+ Aporte</button>
+              <button type="button" id="btn-detail-withdraw" class="btn btn-outline btn-sm">- Resgate</button>
+            </div>
+          </div>
+          <div id="box-detail-history" class="finance-list mt-12"></div>
+        </div>
+
+        <div class="modal-footer mt-18">
+          <button type="button" id="btn-detail-delete-box" class="btn btn-ghost btn-danger-ghost btn-sm">
+            Excluir caixinha
+          </button>
+          <div class="modal-footer-right">
+            <button type="button" id="btn-detail-edit-box" class="btn btn-outline btn-sm">
+              Editar caixinha
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" data-close-finance-modal>
+              Fechar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: FATURA RÁPIDA DO CARTÃO DE CRÉDITO ==================== -->
+  <div id="credit-card-bill-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="card-bill-modal-title">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <div>
+          <span class="micro-label">FATURA DO MÊS</span>
+          <h3 id="card-bill-modal-title" class="modal-title serif-heading-sm">Fatura do Cartão de Crédito</h3>
+          <p id="card-bill-modal-subtitle" class="muted-text"></p>
+        </div>
+        <button type="button" class="btn btn-icon btn-sm" data-close-finance-modal aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      </div>
+      <form id="form-credit-card-bill" class="modal-body stacked-form" autocomplete="off">
+        <input type="hidden" id="input-card-bill-original-month" />
+        <div class="form-field">
+          <label for="input-card-bill-amount">Valor da fatura (atual ou fechada)</label>
+          <div class="input-prefix-group input-prefix-ticket">
+            <span class="input-prefix">R$</span>
+            <input
+              type="text"
+              id="input-card-bill-amount"
+              inputmode="decimal"
+              placeholder="0,00"
+              required
+            />
+          </div>
+          <p class="helper-text">Digite 0,00 para remover a fatura deste mês.</p>
+        </div>
+        <div class="form-row-2">
+          <div class="form-field">
+            <label for="input-card-bill-month">Mês equivalente (orçamento)</label>
+            <input type="month" id="input-card-bill-month" required />
+          </div>
+          <div class="form-field">
+            <label for="input-card-bill-duedate">Data de vencimento real</label>
+            <input type="date" id="input-card-bill-duedate" required />
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="input-card-bill-name">Cartão <span class="muted-text">(opcional)</span></label>
+          <input
+            type="text"
+            id="input-card-bill-name"
+            placeholder="Ex.: Nubank, Inter"
+            maxlength="60"
+          />
+        </div>
+        <label class="checkbox-inline">
+          <input type="checkbox" id="chk-card-bill-next-month" />
+          <span>Vence sempre no mês seguinte (salvar como padrão para novos meses)</span>
+        </label>
+        <div class="modal-footer">
+          <button type="button" id="btn-clear-card-bill" class="btn btn-ghost btn-danger-ghost btn-sm hidden">
+            Zerar mês
+          </button>
+          <div class="modal-footer-right">
+            <button type="button" class="btn btn-ghost btn-sm" data-close-finance-modal>Cancelar</button>
+            <button type="submit" class="btn btn-primary btn-sm">Salvar fatura</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Container de Notificações (Toast) -->
+  <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
