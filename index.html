@@ -5,12 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#263529" />
   <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';"
+  />
+  <meta
     name="description"
     content="Bolsito — Hub pessoal 100% offline de finanças pessoais, despesas, rendas, caixinhas com CDI e controle de passagens de transporte."
   />
   <title>Bolsito — Finanças Pessoais</title>
-  <link rel="icon" type="image/png" href="./assets/icon-bolsito.png" />
-  <link rel="apple-touch-icon" href="./assets/icon-bolsito.png" />
+  <link rel="icon" type="image/png" href="./assets/icon-bolsito-192.png" />
+  <link rel="apple-touch-icon" href="./assets/icon-bolsito-192.png" />
   <link rel="manifest" href="./manifest.json" />
   <link rel="stylesheet" href="./css/styles.css" />
 </head>
@@ -21,7 +25,7 @@
       <div class="sidebar-brand">
         <div class="brand">
           <img
-            src="./assets/icon-bolsito.png"
+            src="./assets/icon-bolsito-192.png"
             alt="Bolsito"
             class="brand-icon"
             width="40"
@@ -360,9 +364,9 @@
                     <i class="dot dot-expense"></i>
                     <span>Despesa</span>
                   </button>
-                  <button type="button" class="legend-chip is-active" data-toggle-series="contributions" aria-pressed="true">
+                  <button type="button" class="legend-chip is-active" data-toggle-series="contributions" aria-pressed="true" title="Aportes líquidos nas caixinhas de reserva (depósitos menos resgates)">
                     <i class="dot dot-contrib"></i>
-                    <span>Aportes</span>
+                    <span>Aportes líq.</span>
                   </button>
                 </div>
               </div>
@@ -445,7 +449,7 @@
           </div>
 
           <!-- Card de Rendas -->
-          <section class="card mt-18" aria-labelledby="flow-income-title">
+          <section id="flow-income-card" class="card mt-18" aria-labelledby="flow-income-title">
             <div class="card-header-block">
               <span class="micro-label">ENTRADAS DO MÊS</span>
               <h2 id="flow-income-title" class="card-title serif-heading-sm">Rendas</h2>
@@ -456,19 +460,22 @@
                 <div class="flow-base-income-top">
                   <div>
                     <span class="micro-label">BOLSA / RENDA MENSAL FIXA</span>
-                    <p class="helper-text">Valor líquido mensal fixo (já incluindo VT, se aplicável).</p>
+                    <p class="helper-text">Valor líquido mensal fixo e dia padrão de pagamento.</p>
                   </div>
-                  <button
-                    type="button"
-                    id="btn-toggle-base-income-received"
-                    class="pill-toggle is-pending"
-                    aria-pressed="false"
-                    title="Alternar status da renda fixa neste mês"
-                  >
-                    A receber
-                  </button>
+                  <div class="flow-base-income-status">
+                    <button
+                      type="button"
+                      id="btn-toggle-base-income-received"
+                      class="pill-toggle is-pending"
+                      aria-pressed="false"
+                      title="Alternar manualmente o status da renda fixa neste mês"
+                    >
+                      A receber
+                    </button>
+                    <span id="flow-base-income-auto-note" class="auto-status-note">Auto • Dia 5</span>
+                  </div>
                 </div>
-                <div class="inline-form">
+                <div class="inline-form flow-base-income-inputs">
                   <div class="input-prefix-group">
                     <span class="input-prefix">R$</span>
                     <input
@@ -477,6 +484,18 @@
                       inputmode="decimal"
                       placeholder="0,00"
                       aria-label="Bolsa ou renda mensal fixa em reais"
+                    />
+                  </div>
+                  <div class="input-prefix-group input-payday-group" title="Dia padrão do pagamento (1 a 31)">
+                    <span class="input-prefix">Dia</span>
+                    <input
+                      type="number"
+                      id="input-flow-pay-day"
+                      min="1"
+                      max="31"
+                      value="5"
+                      inputmode="numeric"
+                      aria-label="Dia padrão de pagamento da renda fixa (1 a 31)"
                     />
                   </div>
                   <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
@@ -1216,20 +1235,31 @@
                       </div>
                     </div>
                     <div class="form-field">
-                      <label for="input-config-cdi-rate">Taxa CDI anual (% a.a.)</label>
-                      <div class="input-prefix-group">
-                        <input
-                          type="text"
-                          id="input-config-cdi-rate"
-                          inputmode="decimal"
-                          placeholder="10,65"
-                        />
-                        <span class="input-suffix">%</span>
-                      </div>
+                      <label for="input-config-pay-day">Dia do pagamento (1–31)</label>
+                      <input
+                        type="number"
+                        id="input-config-pay-day"
+                        min="1"
+                        max="31"
+                        value="5"
+                        inputmode="numeric"
+                      />
+                    </div>
+                  </div>
+                  <div class="form-field">
+                    <label for="input-config-cdi-rate">Taxa CDI anual (% a.a.)</label>
+                    <div class="input-prefix-group">
+                      <input
+                        type="text"
+                        id="input-config-cdi-rate"
+                        inputmode="decimal"
+                        placeholder="10,65"
+                      />
+                      <span class="input-suffix">%</span>
                     </div>
                   </div>
                   <p class="helper-text">
-                    A taxa CDI anual é usada em todas as Caixinhas CDI (juros compostos em 252 dias úteis/ano, sem cálculo de IR).
+                    A renda fixa passa automaticamente para Recebida no dia configurado (com override manual disponível por mês). A taxa CDI anual é usada em todas as Caixinhas CDI (252 dias úteis/ano, sem IR).
                   </p>
                   <div class="form-actions">
                     <button type="submit" class="btn btn-primary btn-sm">Salvar parâmetros</button>
@@ -1431,17 +1461,17 @@
         <div class="quick-actions-grid">
           <button type="button" class="quick-choice-btn" data-day-action="normal" id="btn-day-normal">
             <strong id="btn-day-normal-label">Normal</strong>
-            <span id="btn-day-normal-value">R$ 0,00</span>
+            <span id="btn-day-normal-value" class="money">R$ 0,00</span>
           </button>
 
           <button type="button" class="quick-choice-btn" data-day-action="nao_gastei" id="btn-day-zero">
             <strong>Não gastei</strong>
-            <span>R$ 0,00</span>
+            <span class="money">R$ 0,00</span>
           </button>
 
           <button type="button" class="quick-choice-btn" data-day-action="meia_viagem" id="btn-day-half">
             <strong>Meia viagem</strong>
-            <span id="btn-day-half-value">R$ 0,00</span>
+            <span id="btn-day-half-value" class="money">R$ 0,00</span>
           </button>
         </div>
 
@@ -1669,7 +1699,7 @@
           </div>
           <div class="form-field">
             <label for="input-fixed-start-month">Início (mês)</label>
-            <input type="month" id="input-fixed-start-month" required />
+            <input type="month" id="input-fixed-start-month" placeholder="AAAA-MM" pattern="\d{4}-(0[1-9]|1[0-2])" required />
           </div>
         </div>
         <div class="modal-footer">
@@ -1717,7 +1747,7 @@
         <div class="form-row-2">
           <div class="form-field">
             <label for="input-installment-start-month">1ª parcela (mês)</label>
-            <input type="month" id="input-installment-start-month" required />
+            <input type="month" id="input-installment-start-month" placeholder="AAAA-MM" pattern="\d{4}-(0[1-9]|1[0-2])" required />
           </div>
           <div class="form-field">
             <label for="input-installment-dueday">Dia de vencimento</label>
@@ -1982,27 +2012,22 @@
         </div>
         <div class="form-row-2">
           <div class="form-field">
-            <label for="input-card-bill-month">Mês equivalente (orçamento)</label>
-            <input type="month" id="input-card-bill-month" required />
-          </div>
-          <div class="form-field">
-            <label for="input-card-bill-duedate">Data de vencimento real</label>
+            <label for="input-card-bill-duedate">Data de vencimento</label>
             <input type="date" id="input-card-bill-duedate" required />
           </div>
+          <div class="form-field">
+            <label for="input-card-bill-name">Cartão <span class="muted-text">(opcional)</span></label>
+            <input
+              type="text"
+              id="input-card-bill-name"
+              placeholder="Ex.: Nubank, Inter"
+              maxlength="60"
+            />
+          </div>
         </div>
-        <div class="form-field">
-          <label for="input-card-bill-name">Cartão <span class="muted-text">(opcional)</span></label>
-          <input
-            type="text"
-            id="input-card-bill-name"
-            placeholder="Ex.: Nubank, Inter"
-            maxlength="60"
-          />
-        </div>
-        <label class="checkbox-inline">
-          <input type="checkbox" id="chk-card-bill-next-month" />
-          <span>Vence sempre no mês seguinte (salvar como padrão para novos meses)</span>
-        </label>
+        <p class="helper-text">
+          O mês da fatura no orçamento segue automaticamente a data de vencimento informada.
+        </p>
         <div class="modal-footer">
           <button type="button" id="btn-clear-card-bill" class="btn btn-ghost btn-danger-ghost btn-sm hidden">
             Zerar mês
@@ -2013,6 +2038,31 @@
           </div>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: CONFIRMAÇÃO EDITORIAL REUTILIZÁVEL ==================== -->
+  <div id="confirm-dialog-modal" class="modal-backdrop modal-backdrop-top hidden" role="alertdialog" aria-modal="true" aria-labelledby="confirm-dialog-title" aria-describedby="confirm-dialog-message">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <div>
+          <span id="confirm-dialog-kicker" class="micro-label">CONFIRMAÇÃO</span>
+          <h3 id="confirm-dialog-title" class="modal-title serif-heading-sm">Confirmar ação</h3>
+        </div>
+        <button type="button" id="btn-confirm-dialog-close" class="btn btn-icon btn-sm" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-dialog-message" class="helper-text"></p>
+        <div class="modal-footer mt-18">
+          <button type="button" id="btn-confirm-dialog-cancel" class="btn btn-ghost btn-sm">Cancelar</button>
+          <button type="button" id="btn-confirm-dialog-ok" class="btn btn-danger btn-sm">Confirmar</button>
+        </div>
+      </div>
     </div>
   </div>
 

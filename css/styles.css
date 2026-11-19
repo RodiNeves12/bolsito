@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Calculadora de Passagens — Editorial Orgânico, Bento Grid & 5 Paletas
+   Bolsito — Finanças Pessoais & Passagens (Editorial Orgânico, Bento Grid & 5 Paletas)
    100% Offline-First (Fontes locais .woff2 Lora + Inter)
    ========================================================================== */
 
@@ -877,19 +877,51 @@ code {
   transition: filter var(--dur) var(--ease-fluid);
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
+.modal-backdrop-top {
+  z-index: 1200;
+}
+
 /* Modo Privacidade (data-privacy="on" no <html>) */
 :root[data-privacy='on'] .money,
 :root[data-privacy='on'] .day-value,
 :root[data-privacy='on'] .privacy-mask,
 :root[data-privacy='on'] .day-chip-value,
 :root[data-privacy='on'] #input-card-balance,
-:root[data-privacy='on'] #input-monthly-recharge {
+:root[data-privacy='on'] #input-monthly-recharge,
+:root[data-privacy='on'] #input-flow-base-income,
+:root[data-privacy='on'] #input-config-base-income,
+:root[data-privacy='on'] #input-quick-expense-amount,
+:root[data-privacy='on'] #input-extra-income-amount,
+:root[data-privacy='on'] #input-fixed-amount,
+:root[data-privacy='on'] #input-installment-amount,
+:root[data-privacy='on'] #input-box-goal,
+:root[data-privacy='on'] #input-adjust-box-balance,
+:root[data-privacy='on'] #input-box-tx-amount,
+:root[data-privacy='on'] #input-box-sim-monthly,
+:root[data-privacy='on'] #input-card-bill-amount,
+:root[data-privacy='on'] #input-day-custom-value {
   filter: blur(7px);
   user-select: none;
 }
 
 :root[data-privacy='on'] #input-card-balance:focus,
-:root[data-privacy='on'] #input-monthly-recharge:focus {
+:root[data-privacy='on'] #input-monthly-recharge:focus,
+:root[data-privacy='on'] #input-flow-base-income:focus,
+:root[data-privacy='on'] #input-config-base-income:focus,
+:root[data-privacy='on'] #input-quick-expense-amount:focus,
+:root[data-privacy='on'] #input-extra-income-amount:focus,
+:root[data-privacy='on'] #input-fixed-amount:focus,
+:root[data-privacy='on'] #input-installment-amount:focus,
+:root[data-privacy='on'] #input-box-goal:focus,
+:root[data-privacy='on'] #input-adjust-box-balance:focus,
+:root[data-privacy='on'] #input-box-tx-amount:focus,
+:root[data-privacy='on'] #input-box-sim-monthly:focus,
+:root[data-privacy='on'] #input-card-bill-amount:focus,
+:root[data-privacy='on'] #input-day-custom-value:focus {
   filter: none;
   user-select: auto;
 }
@@ -1452,7 +1484,7 @@ code {
 
 .btn-danger {
   background: var(--danger);
-  color: #faf8f3;
+  color: var(--accent-contrast);
   box-shadow: var(--shadow-xs);
 }
 
@@ -2270,7 +2302,8 @@ select:focus {
 }
 
 .day-cell.status-nao_gastei .day-badge {
-  background: rgba(92, 97, 88, 0.14);
+  background: var(--bg-hover);
+  background: color-mix(in srgb, var(--text-secondary) 14%, transparent);
   color: var(--text-secondary);
 }
 
@@ -2286,7 +2319,8 @@ select:focus {
 }
 
 .day-cell.status-meia_viagem .day-badge {
-  background: rgba(180, 90, 45, 0.15);
+  background: var(--warning-border);
+  background: color-mix(in srgb, var(--warning) 16%, transparent);
   color: var(--warning-text);
 }
 
@@ -2302,7 +2336,8 @@ select:focus {
 }
 
 .day-cell.status-valor_personalizado .day-badge {
-  background: rgba(133, 104, 52, 0.16);
+  background: var(--custom-border);
+  background: color-mix(in srgb, var(--custom) 16%, transparent);
   color: var(--custom-text);
 }
 
@@ -2318,7 +2353,8 @@ select:focus {
 }
 
 .day-cell.status-forcar_normal .day-badge {
-  background: rgba(61, 107, 79, 0.15);
+  background: var(--accent-border);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
   color: var(--accent-text);
 }
 
@@ -3587,7 +3623,7 @@ select:focus {
 
 .toast-error {
   background: var(--danger);
-  color: #faf8f3;
+  color: var(--accent-contrast);
   border-color: transparent;
 }
 
@@ -3751,6 +3787,50 @@ select:focus {
   color: var(--warning-text);
 }
 
+button.net-worth-pillar-action {
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  min-height: 44px;
+  border-color: var(--success-border);
+  transition:
+    background var(--dur) var(--ease-fluid),
+    border-color var(--dur) var(--ease-fluid),
+    transform var(--dur) var(--ease-fluid),
+    box-shadow var(--dur) var(--ease-fluid);
+}
+
+button.net-worth-pillar-action:hover {
+  background: var(--bg-hover);
+  border-color: var(--success);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-xs);
+}
+
+button.net-worth-pillar-action:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.net-worth-pillar-label-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+}
+
+.net-worth-pillar-arrow {
+  width: 12px;
+  height: 12px;
+  color: var(--success-text);
+  flex-shrink: 0;
+  transition: transform var(--dur) var(--ease-fluid);
+}
+
+button.net-worth-pillar-action:hover .net-worth-pillar-arrow {
+  transform: translateX(2px);
+}
+
 .proj-scope-bar {
   display: flex;
   align-items: center;
@@ -3766,6 +3846,35 @@ select:focus {
   justify-content: space-between;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.flow-base-income-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.auto-status-note {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.flow-base-income-inputs {
+  flex-wrap: wrap;
+}
+
+.flow-base-income-inputs .input-payday-group {
+  flex: 0 0 106px;
+  min-width: 96px;
+}
+
+.flow-base-income-inputs .input-payday-group input {
+  text-align: center;
+  padding-right: 8px;
 }
 
 /* Dashboard Linha 2: Donut + Evolução 12 Meses */
@@ -4762,20 +4871,6 @@ select:focus {
   flex-direction: column;
   gap: 4px;
   min-width: 170px;
-}
-
-/* Privacidade nos inputs de renda e simulador */
-:root[data-privacy='on'] #input-flow-base-income,
-:root[data-privacy='on'] #input-config-base-income,
-:root[data-privacy='on'] .privacy-mask {
-  filter: blur(7px);
-  user-select: none;
-}
-
-:root[data-privacy='on'] #input-flow-base-income:focus,
-:root[data-privacy='on'] #input-config-base-income:focus {
-  filter: none;
-  user-select: auto;
 }
 
 /* Prevenção global de overflow horizontal em containers flex/grid */

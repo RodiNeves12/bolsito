@@ -129,7 +129,7 @@ export function formatShortDayMonth(dateStr) {
  * `nextMonth` (true = vence no mês seguinte).
  */
 export function buildDateForYearMonth(ym, day, nextMonth = false) {
-  if (typeof ym !== 'string' || !/^\d{4}-\d{2}$/.test(ym)) {
+  if (typeof ym !== 'string' || !/^\d{4}-(0[1-9]|1[0-2])$/.test(ym)) {
     return getTodayStr();
   }
   const [rawYear, rawMonth] = ym.split('-').map(Number);
@@ -471,11 +471,32 @@ export function getActiveHolidayForDate(dateStr, state, yearCache = null) {
 // Dias Úteis Bancários Nacionais (Motor CDI 100% Offline)
 // ============================================================
 
+export const BUILT_IN_HOLIDAY_KEYS = new Set([
+  'ano_novo',
+  'sao_sebastiao',
+  'carnaval_seg',
+  'carnaval_ter',
+  'cinzas',
+  'sexta_santa',
+  'pascoa',
+  'tiradentes',
+  'sao_jorge',
+  'trabalho',
+  'corpus_christi',
+  'independencia',
+  'aparecida',
+  'finados',
+  'republica',
+  'consciencia_negra',
+  'natal'
+]);
+
 /**
  * Chaves do catálogo embutido que correspondem a feriados nacionais/bancários
  * (padrão ANBIMA / Febraban para contagem de 252 dias úteis/ano no CDI).
- * Feriados estaduais/municipais do RJ (São Sebastião, São Jorge), Quarta de Cinzas
- * e férias/recessos pessoais não suspendem o rendimento do CDI.
+ * Feriados estaduais/municipais do RJ (São Sebastião, São Jorge), Quarta de Cinzas,
+ * férias/recessos pessoais e personalizações de transporte (`holidayOverrides`)
+ * não alteram o calendário bancário oficial do CDI.
  */
 export const NATIONAL_CDI_HOLIDAY_KEYS = new Set([
   'ano_novo',
@@ -494,12 +515,13 @@ export const NATIONAL_CDI_HOLIDAY_KEYS = new Set([
 ]);
 
 /**
- * Retorna um Set<'YYYY-MM-DD'> com todos os feriados nacionais/bancários ATIVOS
- * em um determinado ano (reutilizando o motor offline de datas fixas e móveis).
+ * Retorna um Set<'YYYY-MM-DD'> com todos os feriados nacionais/bancários oficiais
+ * em um determinado ano (reutilizando o motor offline de datas fixas e móveis,
+ * independente das preferências pessoais de transporte em `holidayOverrides`).
  */
-export function buildNationalBusinessHolidaySetForYear(year, holidayOverrides = {}) {
+export function buildNationalBusinessHolidaySetForYear(year) {
   const set = new Set();
-  const builtIns = getBuiltInHolidaysForYear(year, holidayOverrides || {});
+  const builtIns = getBuiltInHolidaysForYear(year, {});
   for (const h of builtIns) {
     if (h.enabled && NATIONAL_CDI_HOLIDAY_KEYS.has(h.key)) {
       set.add(h.date);
@@ -510,10 +532,10 @@ export function buildNationalBusinessHolidaySetForYear(year, holidayOverrides = 
 
 /**
  * Verifica se uma data 'YYYY-MM-DD' é dia útil bancário nacional
- * (segunda a sexta, excluindo feriados nacionais/bancários ativos).
+ * (segunda a sexta, excluindo feriados nacionais/bancários oficiais).
  * Aceita um Map<year, Set<string>> opcional para cache O(1) em loops longos.
  */
-export function isNationalBusinessDay(dateStr, state = {}, yearCache = null) {
+export function isNationalBusinessDay(dateStr, _state = {}, yearCache = null) {
   if (!isValidDateStr(dateStr)) return false;
   const dow = getDayOfWeek(dateStr);
   if (dow === 0 || dow === 6) return false;
@@ -523,7 +545,7 @@ export function isNationalBusinessDay(dateStr, state = {}, yearCache = null) {
   if (yearCache && yearCache.has(year)) {
     holidaySet = yearCache.get(year);
   } else {
-    holidaySet = buildNationalBusinessHolidaySetForYear(year, state?.holidayOverrides || {});
+    holidaySet = buildNationalBusinessHolidaySetForYear(year);
     if (yearCache) {
       yearCache.set(year, holidaySet);
     }

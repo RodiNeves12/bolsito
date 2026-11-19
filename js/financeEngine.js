@@ -10,37 +10,71 @@
 
 import { calculateMonthRaw } from './calculator.js';
 import {
+  CATEGORY_MAP,
+  DEFAULT_INCOME_PAY_DAY,
+  EXPENSE_CATEGORIES,
+  getCategoryMeta
+} from './constants.js';
+import {
   buildDateForYearMonth,
+  getDaysInMonth,
+  getTodayStr,
   getYearMonthKey,
   isValidDateStr,
   MONTH_NAMES,
   MONTH_NAMES_SHORT,
-  pad2
+  pad2,
+  splitDateStr
 } from './holidays.js';
 
+export { EXPENSE_CATEGORIES, getCategoryMeta };
+
 /**
- * Catálogo oficial de categorias de despesas.
- * Todas as cores referenciam tokens CSS definidos em `css/styles.css`
- * (compatíveis com light/dark e todas as 5 paletas).
+ * Resolve o status de recebimento da renda mensal fixa em uma competência ('YYYY-MM').
+ * 1. Se houver override manual explícito em `income.baseReceivedByMonth[ym]` (`true` ou `false`), respeita-o.
+ * 2. Caso contrário, resolve automaticamente a partir de `todayStr` e `income.payDay` (padrão 5):
+ *    - Mês anterior ao atual (`ym < hojeYM`): Recebida (`true`)
+ *    - Mês atual (`ym === hojeYM`): `hoje.dia >= Math.min(payDay, ultimoDiaDoMes)`
+ *    - Mês futuro (`ym > hojeYM`): A receber (`false`)
  */
-export const EXPENSE_CATEGORIES = [
-  { id: 'transporte', label: 'Transporte', colorVar: 'var(--cat-transporte)' },
-  { id: 'cartao', label: 'Cartão de Crédito', colorVar: 'var(--cat-cartao)' },
-  { id: 'alimentacao', label: 'Alimentação', colorVar: 'var(--cat-alimentacao)' },
-  { id: 'assinaturas', label: 'Assinaturas', colorVar: 'var(--cat-assinaturas)' },
-  { id: 'moradia', label: 'Moradia/Contas', colorVar: 'var(--cat-moradia)' },
-  { id: 'lazer', label: 'Lazer', colorVar: 'var(--cat-lazer)' },
-  { id: 'saude', label: 'Saúde', colorVar: 'var(--cat-saude)' },
-  { id: 'educacao', label: 'Educação', colorVar: 'var(--cat-educacao)' },
-  { id: 'compras', label: 'Compras', colorVar: 'var(--cat-compras)' },
-  { id: 'dividas', label: 'Dívidas', colorVar: 'var(--cat-dividas)' },
-  { id: 'outros', label: 'Outros', colorVar: 'var(--cat-outros)' }
-];
+export function resolveBaseIncomeStatus(ym, income, todayStr = getTodayStr()) {
+  const rawPayDay = Number(income?.payDay);
+  const payDay = Number.isFinite(rawPayDay)
+    ? Math.min(31, Math.max(1, Math.round(rawPayDay)))
+    : DEFAULT_INCOME_PAY_DAY;
 
-const CATEGORY_MAP = new Map(EXPENSE_CATEGORIES.map((c) => [c.id, c]));
+  const hasManualOverride =
+    Boolean(income?.baseReceivedByMonth) &&
+    typeof income.baseReceivedByMonth === 'object' &&
+    typeof income.baseReceivedByMonth[ym] === 'boolean';
 
-export function getCategoryMeta(categoryId) {
-  return CATEGORY_MAP.get(categoryId) || CATEGORY_MAP.get('outros');
+  if (hasManualOverride) {
+    return {
+      received: income.baseReceivedByMonth[ym],
+      isAuto: false,
+      payDay
+    };
+  }
+
+  const safeToday = isValidDateStr(todayStr) ? todayStr : getTodayStr();
+  const todayYM = safeToday.slice(0, 7);
+
+  let received = false;
+  if (ym < todayYM) {
+    received = true;
+  } else if (ym > todayYM) {
+    received = false;
+  } else {
+    const { year: ty, month: tm, day: td } = splitDateStr(safeToday);
+    const effectivePayDay = Math.min(payDay, getDaysInMonth(ty, tm));
+    received = td >= effectivePayDay;
+  }
+
+  return {
+    received,
+    isAuto: true,
+    payDay
+  };
 }
 
 // ============================================================
@@ -90,6 +124,18 @@ export function getInstallmentInfoForMonth(installment, ym) {
   const progressPct = Math.min(100, Math.round((currentNumber / total) * 100));
   const endMonth = addMonthsYM(installment.startMonth, total - 1);
 
+  // Contagem estrita de parcelas marcadas como pagas ao longo de todo o plano
+  let paidInstallmentsCount = 0;
+  if (installment.paidByMonth && typeof installment.paidByMonth === 'object') {
+    for (let i = 0; i < total; i++) {
+      const mKey = addMonthsYM(installment.startMonth, i);
+      if (installment.paidByMonth[mKey]) {
+        paidInstallmentsCount++;
+      }
+    }
+  }
+  const paidProgressPct = Math.min(100, Math.round((paidInstallmentsCount / total) * 100));
+
   return {
     currentNumber,
     totalInstallments: total,
@@ -98,6 +144,8 @@ export function getInstallmentInfoForMonth(installment, ym) {
     remainingInstallments,
     remainingAmountCents,
     progressPct,
+    paidInstallmentsCount,
+    paidProgressPct,
     endMonth
   };
 }
@@ -134,9 +182,12 @@ export function calculateFinanceMonth(year, month, state, options = {}) {
     savingsCents: transportMonth?.totalSavingsCents || 0
   };
 
-  // 2. Rendas (Bolsa / Renda mensal fixa + Rendas extras pontuais do mês + status Recebida/A receber)
+  // 2. Rendas (Bolsa / Renda mensal fixa + dia padrão auto-recebida + Rendas extras pontuais)
   const baseMonthlyCents = Math.max(0, Math.round(Number(income.baseMonthly) || 0));
-  const baseReceived = Boolean(income.baseReceivedByMonth && income.baseReceivedByMonth[ym]);
+  const baseIncomeStatus = resolveBaseIncomeStatus(ym, income, options.todayStr);
+  const baseReceived = baseIncomeStatus.received;
+  const baseReceivedAuto = baseIncomeStatus.isAuto;
+  const basePayDay = baseIncomeStatus.payDay;
 
   const extras = (Array.isArray(income.extras) ? income.extras : [])
     .filter((item) => item && typeof item.date === 'string' && item.date.startsWith(`${ym}-`))
@@ -220,7 +271,6 @@ export function calculateFinanceMonth(year, month, state, options = {}) {
   // 5b. Fatura Rápida do Cartão de Crédito na competência ('YYYY-MM')
   const cardDefaults = expenses.creditCardDefaults || {
     dueDay: 10,
-    dueInNextMonth: false,
     cardName: 'Cartão de Crédito'
   };
   const rawCardBill =
@@ -232,7 +282,7 @@ export function calculateFinanceMonth(year, month, state, options = {}) {
   const fallbackDueDay = rawCardBill?.dueDay || cardDefaults.dueDay || 10;
   const dueDate = isValidDateStr(rawCardBill?.dueDate)
     ? rawCardBill.dueDate
-    : buildDateForYearMonth(ym, fallbackDueDay, Boolean(cardDefaults.dueInNextMonth));
+    : buildDateForYearMonth(ym, fallbackDueDay, false);
   const dueDay = Number(dueDate.slice(8, 10));
 
   const creditCardBill = {
@@ -240,7 +290,6 @@ export function calculateFinanceMonth(year, month, state, options = {}) {
     amount: creditCardBillAmount,
     dueDate,
     dueDay,
-    dueInNextMonth: Boolean(cardDefaults.dueInNextMonth),
     paid: Boolean(rawCardBill?.paid),
     cardName:
       (typeof rawCardBill?.cardName === 'string' && rawCardBill.cardName.trim()) ||
@@ -370,7 +419,9 @@ export function calculateFinanceMonth(year, month, state, options = {}) {
     monthName: MONTH_NAMES[month - 1],
     monthShort: MONTH_NAMES_SHORT[month - 1],
     baseMonthlyCents,
+    basePayDay,
     baseReceived,
+    baseReceivedAuto,
     extras,
     extrasTotalCents,
     totalIncomeCents,
@@ -431,7 +482,7 @@ export function calculateConsolidatedNetWorth(financeMonth, caixinhasSummary) {
 
 /**
  * Calcula a evolução dos últimos 12 meses encerrando em (endYear, endMonth):
- * Receita vs. Despesa (incluindo Passagens automático) vs. Aportes nas Caixinhas.
+ * Receita vs. Despesa (incluindo Passagens automático) vs. Aportes líquidos nas Caixinhas.
  */
 export function calculateFinance12Months(endYear, endMonth, state, holidayYearCache = null) {
   const cache = holidayYearCache || new Map();
@@ -448,7 +499,7 @@ export function calculateFinance12Months(endYear, endMonth, state, holidayYearCa
     const { year, month } = parseYM(ym);
     const mData = calculateFinanceMonth(year, month, state, { holidayYearCache: cache });
 
-    const contributionsCents = mData.monthDepositsCents;
+    const contributionsCents = mData.monthNetContributionCents;
     maxBarCents = Math.max(maxBarCents, mData.totalIncomeCents, mData.totalExpensesCents, contributionsCents);
 
     totalIncome12mCents += mData.totalIncomeCents;

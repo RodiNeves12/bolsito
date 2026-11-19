@@ -3,27 +3,39 @@
  * Todos os caminhos são relativos para funcionar localmente e no GitHub Pages.
  */
 
-const CACHE_NAME = 'bolsito-cache-v12';
+const CACHE_NAME = 'bolsito-cache-v16';
 
 const STATIC_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon.svg',
-  './assets/icon-bolsito.png',
+  './assets/icon-bolsito-192.png',
+  './assets/icon-bolsito-512.png',
   './css/styles.css',
   './assets/fonts/inter-latin.woff2',
   './assets/fonts/inter-latin-ext.woff2',
   './assets/fonts/lora-latin.woff2',
   './assets/fonts/lora-latin-ext.woff2',
   './js/app.js',
+  './js/constants.js',
+  './js/store.js',
+  './js/modalManager.js',
   './js/state.js',
   './js/holidays.js',
   './js/calculator.js',
   './js/cdiEngine.js',
   './js/financeEngine.js',
   './js/financeUI.js',
-  './js/ui.js'
+  './js/ui.js',
+  './js/views/dashboardView.js',
+  './js/views/flowView.js',
+  './js/views/caixinhasView.js',
+  './js/views/financeModals.js',
+  './js/controllers/transportController.js',
+  './js/controllers/financeController.js',
+  './js/controllers/caixinhasController.js',
+  './js/controllers/settingsController.js'
 ];
 
 // Instalação: pré-carrega todos os arquivos estáticos da aplicação no cache
@@ -58,7 +70,7 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   event.respondWith(
-    caches.match(request).then((cachedResponse) => {
+    caches.match(request, { ignoreSearch: true }).then((cachedResponse) => {
       if (cachedResponse) {
         return cachedResponse;
       }

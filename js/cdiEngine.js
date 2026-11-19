@@ -10,16 +10,20 @@
 
 import {
   addDaysStr,
+  buildNationalBusinessHolidaySetForYear,
+  formatLocalDate,
   getTodayStr,
-  isNationalBusinessDay,
   isValidDateStr,
   MONTH_NAMES_SHORT,
+  parseLocalDate,
   splitDateStr
 } from './holidays.js';
+import { DEFAULT_CDI_ANNUAL_RATE } from './state.js';
 
 export const BUSINESS_DAYS_PER_YEAR = 252;
 export const BUSINESS_DAYS_PER_MONTH = 21;
 const MAX_SIMULATION_DAYS = 7305; // Limite de segurança (~20 anos)
+const YM_REGEX = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 /**
  * Calcula a taxa diária composta de CDI para um determinado percentual do CDI.
@@ -129,7 +133,7 @@ export function calculateBoxProjection(
 export function calculateBoxPerformance(box, cdiAnnualRate, state = {}, options = {}) {
   const asOfDate = isValidDateStr(options.asOfDate) ? options.asOfDate : getTodayStr();
   const targetYM =
-    typeof options.targetYM === 'string' && /^\d{4}-\d{2}$/.test(options.targetYM)
+    typeof options.targetYM === 'string' && YM_REGEX.test(options.targetYM)
       ? options.targetYM
       : asOfDate.slice(0, 7);
   const nationalHolidayCache = options.nationalHolidayCache || new Map();
@@ -182,46 +186,91 @@ export function calculateBoxPerformance(box, cdiAnnualRate, state = {}, options 
   let principalFloat = 0;
   let monthYieldFloat = 0;
   let businessDaysWithYield = 0;
+  let truncatedHistory = false;
+
+  const applyTx = (tx) => {
+    if (tx.type === 'deposit') {
+      balanceFloat += tx.amount;
+      principalFloat += tx.amount;
+      totalDepositedCents += tx.amount;
+    } else if (tx.type === 'withdraw') {
+      const actualWithdraw = Math.min(balanceFloat, tx.amount);
+      totalWithdrawnCents += tx.amount;
+      if (balanceFloat > 0 && actualWithdraw > 0) {
+        const remainingRatio = Math.max(0, (balanceFloat - actualWithdraw) / balanceFloat);
+        balanceFloat = Math.max(0, balanceFloat - actualWithdraw);
+        principalFloat = principalFloat * remainingRatio;
+      } else {
+        balanceFloat = 0;
+        principalFloat = 0;
+      }
+    }
+  };
 
   if (firstTxDate) {
     const earliestAllowed = addDaysStr(asOfDate, -MAX_SIMULATION_DAYS);
-    let cursor = firstTxDate < earliestAllowed ? earliestAllowed : firstTxDate;
+    let startCursor = firstTxDate;
 
-    while (cursor <= asOfDate) {
-      // 1. Rendimento do dia útil sobre o saldo existente no fechamento anterior
-      if (balanceFloat > 0 && isNationalBusinessDay(cursor, state, nationalHolidayCache)) {
-        const dayYield = balanceFloat * dailyRate;
-        balanceFloat += dayYield;
-        businessDaysWithYield++;
-        if (cursor.slice(0, 7) === targetYM) {
-          monthYieldFloat += dayYield;
+    // Se houver movimentações anteriores à janela de 20 anos, incorpora ao saldo inicial sem perdê-las
+    if (firstTxDate < earliestAllowed) {
+      truncatedHistory = true;
+      for (const tx of validTxs) {
+        if (tx.date < earliestAllowed) {
+          applyTx(tx);
+        } else {
+          break;
         }
       }
+      startCursor = earliestAllowed;
+    }
 
-      // 2. Aportes e resgates registrados nesta data
-      const dayTxs = txByDate.get(cursor);
-      if (dayTxs) {
-        for (const tx of dayTxs) {
-          if (tx.type === 'deposit') {
-            balanceFloat += tx.amount;
-            principalFloat += tx.amount;
-            totalDepositedCents += tx.amount;
-          } else if (tx.type === 'withdraw') {
-            const actualWithdraw = Math.min(balanceFloat, tx.amount);
-            totalWithdrawnCents += tx.amount;
-            if (balanceFloat > 0 && actualWithdraw > 0) {
-              const remainingRatio = Math.max(0, (balanceFloat - actualWithdraw) / balanceFloat);
-              balanceFloat = Math.max(0, balanceFloat - actualWithdraw);
-              principalFloat = principalFloat * remainingRatio;
+    const [targetYearNum, targetMonthNum] = targetYM.split('-').map(Number);
+    const { year: endY, month: endM, day: endD } = splitDateStr(asOfDate);
+    const endYmdNum = endY * 10000 + endM * 100 + endD;
+    const cursorDt = parseLocalDate(startCursor);
+    let cachedYear = -1;
+    let cachedHolidaySet = null;
+
+    while (true) {
+      const y = cursorDt.getFullYear();
+      const m = cursorDt.getMonth() + 1;
+      const d = cursorDt.getDate();
+      if (y * 10000 + m * 100 + d > endYmdNum) break;
+      const dateStr = formatLocalDate(y, m, d);
+
+      // 1. Rendimento do dia útil bancário sobre o saldo existente no fechamento anterior
+      if (balanceFloat > 0) {
+        const dow = cursorDt.getDay();
+        if (dow !== 0 && dow !== 6) {
+          if (y !== cachedYear) {
+            cachedYear = y;
+            if (nationalHolidayCache.has(y)) {
+              cachedHolidaySet = nationalHolidayCache.get(y);
             } else {
-              balanceFloat = 0;
-              principalFloat = 0;
+              cachedHolidaySet = buildNationalBusinessHolidaySetForYear(y);
+              nationalHolidayCache.set(y, cachedHolidaySet);
+            }
+          }
+          if (!cachedHolidaySet.has(dateStr)) {
+            const dayYield = balanceFloat * dailyRate;
+            balanceFloat += dayYield;
+            businessDaysWithYield++;
+            if (y === targetYearNum && m === targetMonthNum) {
+              monthYieldFloat += dayYield;
             }
           }
         }
       }
 
-      cursor = addDaysStr(cursor, 1);
+      // 2. Aportes e resgates registrados nesta data
+      const dayTxs = txByDate.get(dateStr);
+      if (dayTxs) {
+        for (let i = 0; i < dayTxs.length; i++) {
+          applyTx(dayTxs[i]);
+        }
+      }
+
+      cursorDt.setDate(d + 1);
     }
   }
 
@@ -260,8 +309,11 @@ export function calculateBoxPerformance(box, cdiAnnualRate, state = {}, options 
     currentBalanceCents,
     monthYieldCents,
     businessDaysWithYield,
+    truncatedHistory,
     transactionsCount: validTxs.length,
-    transactionsDesc: [...validTxs].reverse(),
+    transactionsDesc: [...validTxs]
+      .reverse()
+      .map((tx) => ({ ...tx, isFuture: tx.date > asOfDate })),
     projections
   };
 }
@@ -334,12 +386,12 @@ export function calculateAllCaixinhas(state, options = {}) {
   const cdiAnnualRate =
     Number.isFinite(caixinhas.cdiAnnualRate) && caixinhas.cdiAnnualRate >= 0
       ? caixinhas.cdiAnnualRate
-      : 10.65;
+      : DEFAULT_CDI_ANNUAL_RATE;
   const boxesList = Array.isArray(caixinhas.boxes) ? caixinhas.boxes : [];
   const nationalHolidayCache = options.nationalHolidayCache || new Map();
   const asOfDate = isValidDateStr(options.asOfDate) ? options.asOfDate : getTodayStr();
   const targetYM =
-    typeof options.targetYM === 'string' && /^\d{4}-\d{2}$/.test(options.targetYM)
+    typeof options.targetYM === 'string' && YM_REGEX.test(options.targetYM)
       ? options.targetYM
       : asOfDate.slice(0, 7);
   const monthlyContributionCents = Math.max(

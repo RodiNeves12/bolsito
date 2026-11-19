@@ -20,18 +20,32 @@ import {
 } from './holidays.js';
 import { sortFareSchedules } from './state.js';
 
+function ensureSortedFareSchedules(fareSchedules) {
+  if (!Array.isArray(fareSchedules) || fareSchedules.length === 0) {
+    return [];
+  }
+  // Caminho rápido O(N): se já estiver ordenado (caso padrão do estado), evita cópia e sort
+  for (let i = 1; i < fareSchedules.length; i++) {
+    if (fareSchedules[i - 1].effectiveDate > fareSchedules[i].effectiveDate) {
+      return sortFareSchedules(fareSchedules);
+    }
+  }
+  return fareSchedules;
+}
+
 /**
  * Encontra a vigência de tarifa aplicável para uma data 'YYYY-MM-DD'.
  * Aplica a tabela com maior effectiveDate <= dateStr.
  * Caso dateStr seja anterior à primeira vigência cadastrada, usa a primeira tabela disponível.
  */
-export function getActiveFareSchedule(dateStr, fareSchedules) {
+export function getActiveFareSchedule(dateStr, fareSchedules, isSorted = false) {
   if (!Array.isArray(fareSchedules) || fareSchedules.length === 0) {
     return null;
   }
-  const sorted = sortFareSchedules(fareSchedules);
+  const sorted = isSorted ? fareSchedules : ensureSortedFareSchedules(fareSchedules);
   let active = sorted[0];
-  for (const sched of sorted) {
+  for (let i = 0; i < sorted.length; i++) {
+    const sched = sorted[i];
     if (sched.effectiveDate <= dateStr) {
       active = sched;
     } else {
@@ -53,9 +67,10 @@ export function getActiveFareSchedule(dateStr, fareSchedules) {
  * 2. Feriado ativo na data D -> R$ 0,00 (ou 50% se configurado como meia_viagem, ex.: Cinzas)
  * 3. Grade semanal vigente na data D -> valor configurado para o dia da semana
  */
-export function calculateDay(dateStr, state, holidayYearCache = null) {
+export function calculateDay(dateStr, state, holidayYearCache = null, sortedSchedules = null) {
   const dayOfWeek = getDayOfWeek(dateStr);
-  const schedule = getActiveFareSchedule(dateStr, state.fareSchedules);
+  const schedules = sortedSchedules || ensureSortedFareSchedules(state.fareSchedules);
+  const schedule = getActiveFareSchedule(dateStr, schedules, true);
   const scheduledBaseCents = schedule ? (schedule.weekdays[dayOfWeek] || 0) : 0;
 
   const holiday = getActiveHolidayForDate(dateStr, state, holidayYearCache);
@@ -134,12 +149,13 @@ export function calculateDay(dateStr, state, holidayYearCache = null) {
 /**
  * Calcula todos os dias e totalizadores brutos de um mês específico (sem encadeamento).
  */
-export function calculateMonthRaw(year, month, state, holidayYearCache = null) {
+export function calculateMonthRaw(year, month, state, holidayYearCache = null, sortedSchedules = null) {
   const daysCount = getDaysInMonth(year, month);
   const ym = getYearMonthKey(year, month);
   const todayStr = getTodayStr();
   const includeToday = state.settings?.includeTodayInProjection !== false;
   const projectionStartStr = includeToday ? todayStr : addDaysStr(todayStr, 1);
+  const schedules = sortedSchedules || ensureSortedFareSchedules(state.fareSchedules);
 
   const days = [];
   let grossScheduledCents = 0;
@@ -160,7 +176,7 @@ export function calculateMonthRaw(year, month, state, holidayYearCache = null) {
 
   for (let d = 1; d <= daysCount; d++) {
     const dateStr = formatLocalDate(year, month, d);
-    const dayCalc = calculateDay(dateStr, state, holidayYearCache);
+    const dayCalc = calculateDay(dateStr, state, holidayYearCache, schedules);
     days.push(dayCalc);
 
     grossScheduledCents += dayCalc.scheduledBaseCents;
@@ -272,6 +288,7 @@ function findChainStartYear(targetYear, state) {
 export function buildCompensationChain(targetYear, targetMonth, state, holidayYearCache = null) {
   const cache = holidayYearCache || new Map();
   const startYear = findChainStartYear(targetYear, state);
+  const sortedSchedules = ensureSortedFareSchedules(state.fareSchedules);
   const resultsByYM = new Map();
 
   let carryCents = 0; // Positivo = crédito disponível; Negativo = déficit acumulado
@@ -279,7 +296,7 @@ export function buildCompensationChain(targetYear, targetMonth, state, holidayYe
   for (let y = startYear; y <= targetYear; y++) {
     const lastMonth = y === targetYear ? targetMonth : 12;
     for (let m = 1; m <= lastMonth; m++) {
-      const raw = calculateMonthRaw(y, m, state, cache);
+      const raw = calculateMonthRaw(y, m, state, cache, sortedSchedules);
       const previousCreditCents = carryCents;
 
       // Líquido necessário considerando crédito (abate) ou déficit (soma) vindo do mês anterior
@@ -350,6 +367,7 @@ export function calculateYearSummary(year, state, holidayYearCache = null) {
   let totalManualSavingsCents = 0;
   let totalManualExtraCents = 0;
   let totalActiveDays = 0;
+  let totalDaysInYear = 0;
   let maxMonthActualCents = 0;
 
   for (let m = 1; m <= 12; m++) {
@@ -364,6 +382,7 @@ export function calculateYearSummary(year, state, holidayYearCache = null) {
     totalManualSavingsCents += monthData.manualSavingsCents;
     totalManualExtraCents += monthData.manualExtraCents;
     totalActiveDays += monthData.activeDaysCount;
+    totalDaysInYear += monthData.daysCount;
     if (monthData.actualTotalCents > maxMonthActualCents) {
       maxMonthActualCents = monthData.actualTotalCents;
     }
@@ -371,7 +390,8 @@ export function calculateYearSummary(year, state, holidayYearCache = null) {
 
   const avgPerActiveDayCents =
     totalActiveDays > 0 ? Math.round(totalActualCents / totalActiveDays) : 0;
-  const avgPerWeekCents = Math.round(totalActualCents / 52.1429);
+  const weeksInYear = totalDaysInYear > 0 ? totalDaysInYear / 7 : 365 / 7;
+  const avgPerWeekCents = Math.round(totalActualCents / weeksInYear);
 
   return {
     year,
@@ -398,6 +418,7 @@ export function calculateYearSummary(year, state, holidayYearCache = null) {
  */
 export function calculateCardProjection(state, holidayYearCache = null) {
   const cache = holidayYearCache || new Map();
+  const sortedSchedules = ensureSortedFareSchedules(state.fareSchedules);
   const todayStr = getTodayStr();
   const { year: curYear, month: curMonth } = splitDateStr(todayStr);
   const includeToday = state.settings?.includeTodayInProjection !== false;
@@ -417,7 +438,7 @@ export function calculateCardProjection(state, holidayYearCache = null) {
   if (startDate <= lastDayOfCurrentMonth) {
     let cur = startDate;
     while (cur <= lastDayOfCurrentMonth) {
-      const dayCalc = calculateDay(cur, state, cache);
+      const dayCalc = calculateDay(cur, state, cache, sortedSchedules);
       if (dayCalc.effectiveCents > 0) {
         remainingMonthCostCents += dayCalc.effectiveCents;
         remainingMonthActiveDays++;
@@ -441,7 +462,7 @@ export function calculateCardProjection(state, holidayYearCache = null) {
   let exceededHorizon = false;
 
   for (let step = 0; step < MAX_HORIZON_DAYS; step++) {
-    const dayCalc = calculateDay(cursor, state, cache);
+    const dayCalc = calculateDay(cursor, state, cache, sortedSchedules);
     const cost = dayCalc.effectiveCents;
 
     if (cost === 0) {
@@ -504,6 +525,7 @@ export function calculateRangeSummary(rawStart, rawEnd, state, holidayYearCache 
   const effectiveEnd = truncated ? addDaysStr(startDate, MAX_RANGE_DAYS - 1) : endDate;
 
   const cache = holidayYearCache || new Map();
+  const sortedSchedules = ensureSortedFareSchedules(state.fareSchedules);
   const todayStr = getTodayStr();
   const includeToday = state.settings?.includeTodayInProjection !== false;
   const projectionStartStr = includeToday ? todayStr : addDaysStr(todayStr, 1);
@@ -521,7 +543,7 @@ export function calculateRangeSummary(rawStart, rawEnd, state, holidayYearCache 
 
   let cursor = startDate;
   while (cursor <= effectiveEnd) {
-    const dayCalc = calculateDay(cursor, state, cache);
+    const dayCalc = calculateDay(cursor, state, cache, sortedSchedules);
     totalCents += dayCalc.effectiveCents;
     predictedBaseCents += dayCalc.predictedBaseCents;
     holidaySavingsCents += dayCalc.holidaySavingsCents;

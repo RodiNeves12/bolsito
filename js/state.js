@@ -4,34 +4,34 @@
  */
 
 import {
+  DEFAULT_CDI_ANNUAL_RATE,
+  DEFAULT_INCOME_PAY_DAY,
+  SCHEMA_VERSION,
+  STORAGE_KEY,
+  VALID_EXPENSE_CATEGORIES,
+  VALID_PALETTES
+} from './constants.js';
+import {
   buildDateForYearMonth,
+  BUILT_IN_HOLIDAY_KEYS,
   getTodayStr,
   isValidDateStr,
   getCurrentDateTimeLabel
 } from './holidays.js';
 
-export const STORAGE_KEY = 'calc_passagens_v1';
-export const SCHEMA_VERSION = 2;
-export const DEFAULT_CDI_ANNUAL_RATE = 10.65;
-
-export const VALID_PALETTES = ['floresta', 'editorial', 'ardosia', 'cafe', 'ameixa'];
-
-export const VALID_EXPENSE_CATEGORIES = [
-  'transporte',
-  'cartao',
-  'alimentacao',
-  'assinaturas',
-  'moradia',
-  'lazer',
-  'saude',
-  'educacao',
-  'compras',
-  'dividas',
-  'outros'
-];
+export {
+  DEFAULT_CDI_ANNUAL_RATE,
+  DEFAULT_INCOME_PAY_DAY,
+  SCHEMA_VERSION,
+  STORAGE_KEY,
+  VALID_EXPENSE_CATEGORIES,
+  VALID_PALETTES
+};
 
 const VALID_EXPENSE_CATEGORY_SET = new Set(VALID_EXPENSE_CATEGORIES);
-const YM_REGEX = /^\d{4}-\d{2}$/;
+const YM_REGEX = /^\d{4}-(0[1-9]|1[0-2])$/;
+const SAFE_ID_REGEX = /^[a-zA-Z0-9_-]{1,64}$/;
+const MAX_SAFE_CURRENCY_REAIS = Math.floor(Number.MAX_SAFE_INTEGER / 100);
 
 const VALID_EXCEPTION_TYPES = new Set([
   'nao_gastei',
@@ -62,12 +62,12 @@ export function centsToInputValue(cents) {
 }
 
 /**
- * Converte texto digitado pelo usuário (ex.: "9,40", "9.40", "R$ 1.250,50", "10")
+ * Converte texto digitado pelo usuário (ex.: "9,40", "9.40", "1.000", "R$ 1.250,50", "10")
  * para centavos inteiros não-negativos. Retorna null se inválido.
  */
 export function parseCurrencyToCents(raw) {
   if (typeof raw === 'number') {
-    if (!Number.isFinite(raw) || raw < 0) return null;
+    if (!Number.isFinite(raw) || raw < 0 || raw > MAX_SAFE_CURRENCY_REAIS) return null;
     return Math.round(raw * 100);
   }
   if (typeof raw !== 'string') return null;
@@ -75,7 +75,7 @@ export function parseCurrencyToCents(raw) {
   let cleaned = raw.trim().replace(/^R\$\s*/i, '').replace(/\s+/g, '');
   if (!cleaned) return null;
 
-  // Detecta formato brasileiro (ponto como milhar, vírgula como decimal)
+  // Detecta formato brasileiro (ponto como milhar, vírgula como decimal) ou US
   if (cleaned.includes(',') && cleaned.includes('.')) {
     if (cleaned.lastIndexOf(',') > cleaned.lastIndexOf('.')) {
       cleaned = cleaned.replace(/\./g, '').replace(',', '.');
@@ -84,15 +84,18 @@ export function parseCurrencyToCents(raw) {
     }
   } else if (cleaned.includes(',')) {
     cleaned = cleaned.replace(',', '.');
+  } else if (/^\d{1,3}(\.\d{3})+$/.test(cleaned)) {
+    // Separador de milhar brasileiro sem centavos (ex.: "1.000", "1.250", "1.000.000")
+    cleaned = cleaned.replace(/\./g, '');
   }
 
-  // Permite apenas dígitos e no máximo um ponto decimal
-  if (!/^\d+(\.\d{1,4})?$/.test(cleaned)) {
+  // Permite apenas dígitos e no máximo 2 casas decimais
+  if (!/^\d+(\.\d{1,2})?$/.test(cleaned)) {
     return null;
   }
 
   const parsed = Number(cleaned);
-  if (!Number.isFinite(parsed) || parsed < 0) return null;
+  if (!Number.isFinite(parsed) || parsed < 0 || parsed > MAX_SAFE_CURRENCY_REAIS) return null;
   return Math.round(parsed * 100);
 }
 
@@ -116,7 +119,19 @@ export function parsePercentageRate(raw, { min = 0, max = 1000 } = {}) {
 }
 
 export function generateId(prefix = 'id') {
-  return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+  const safePrefix = SAFE_ID_REGEX.test(prefix) ? prefix : 'id';
+  if (typeof globalThis.crypto?.randomUUID === 'function') {
+    return `${safePrefix}_${globalThis.crypto.randomUUID().replace(/-/g, '').slice(0, 12)}`;
+  }
+  return `${safePrefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function sanitizeId(rawId, prefix = 'id') {
+  if (typeof rawId === 'string') {
+    const trimmed = rawId.trim();
+    if (SAFE_ID_REGEX.test(trimmed)) return trimmed;
+  }
+  return generateId(prefix);
 }
 
 /**
@@ -127,7 +142,8 @@ export function createDefaultFinanceState() {
   return {
     income: {
       baseMonthly: 0, // centavos inteiros (bolsa auxílio / renda fixa líquida)
-      baseReceivedByMonth: {}, // Mapa 'YYYY-MM' -> boolean (true = Recebida, false = A receber)
+      payDay: DEFAULT_INCOME_PAY_DAY, // dia padrão de pagamento da renda fixa (1..31)
+      baseReceivedByMonth: {}, // Override manual 'YYYY-MM' -> boolean (true = Recebida, false = A receber)
       extras: [] // { id, date, description, amount, received }
     },
     expenses: {
@@ -136,7 +152,6 @@ export function createDefaultFinanceState() {
       variable: [], // { id, date, description, amount, category }
       creditCardDefaults: {
         dueDay: 10,
-        dueInNextMonth: false,
         cardName: 'Cartão de Crédito'
       },
       // Mapa 'YYYY-MM' -> { amount, dueDate ('YYYY-MM-DD'), dueDay, paid, cardName }
@@ -223,9 +238,10 @@ function sanitizeFinanceState(rawFinance) {
     return defaults;
   }
 
-  // 1. Rendas (com migração automática do legado salaryDepositedByMonth -> baseReceivedByMonth)
+  // 1. Rendas (com migração automática do legado salaryDepositedByMonth -> baseReceivedByMonth e fallback payDay)
   const rawIncome = rawFinance.income && typeof rawFinance.income === 'object' ? rawFinance.income : {};
   const baseMonthly = sanitizeCents(rawIncome.baseMonthly, 0);
+  const payDay = sanitizeDueDay(rawIncome.payDay, DEFAULT_INCOME_PAY_DAY);
   const baseReceivedByMonth = sanitizePaidByMonth(rawIncome.baseReceivedByMonth);
   const legacySalaryDeposited = sanitizePaidByMonth(rawFinance.salaryDepositedByMonth);
   for (const [ym, val] of Object.entries(legacySalaryDeposited)) {
@@ -242,7 +258,7 @@ function sanitizeFinanceState(rawFinance) {
       const amount = sanitizeCents(item.amount, -1);
       if (amount < 0) continue;
       extras.push({
-        id: typeof item.id === 'string' && item.id.trim() ? item.id.trim() : generateId('inc'),
+        id: sanitizeId(item.id, 'inc'),
         date: item.date,
         description:
           typeof item.description === 'string' && item.description.trim()
@@ -266,7 +282,7 @@ function sanitizeFinanceState(rawFinance) {
         typeof item.name === 'string' && item.name.trim() ? item.name.trim().slice(0, 80) : '';
       if (!name) continue;
       fixed.push({
-        id: typeof item.id === 'string' && item.id.trim() ? item.id.trim() : generateId('fix'),
+        id: sanitizeId(item.id, 'fix'),
         name,
         amount: sanitizeCents(item.amount, 0),
         dueDay: sanitizeDueDay(item.dueDay, 10),
@@ -305,7 +321,7 @@ function sanitizeFinanceState(rawFinance) {
         rawTotalAmount > 0 ? rawTotalAmount : installmentAmount * totalInstallments;
 
       installments.push({
-        id: typeof item.id === 'string' && item.id.trim() ? item.id.trim() : generateId('inst'),
+        id: sanitizeId(item.id, 'inst'),
         name,
         totalAmount,
         installmentAmount,
@@ -326,7 +342,7 @@ function sanitizeFinanceState(rawFinance) {
       const amount = sanitizeCents(item.amount, -1);
       if (amount < 0) continue;
       variable.push({
-        id: typeof item.id === 'string' && item.id.trim() ? item.id.trim() : generateId('var'),
+        id: sanitizeId(item.id, 'var'),
         date: item.date,
         description:
           typeof item.description === 'string' && item.description.trim()
@@ -367,7 +383,7 @@ function sanitizeFinanceState(rawFinance) {
           const amount = sanitizeCents(tx.amount, 0);
           if (amount <= 0) continue;
           const cleanTx = {
-            id: typeof tx.id === 'string' && tx.id.trim() ? tx.id.trim() : generateId('tx'),
+            id: sanitizeId(tx.id, 'tx'),
             date: tx.date,
             type: tx.type,
             amount
@@ -385,7 +401,7 @@ function sanitizeFinanceState(rawFinance) {
       const kind = box.kind === 'daily' ? 'daily' : 'reserve';
 
       boxes.push({
-        id: typeof box.id === 'string' && box.id.trim() ? box.id.trim() : generateId('box'),
+        id: sanitizeId(box.id, 'box'),
         name,
         kind,
         cdiPercent,
@@ -402,10 +418,6 @@ function sanitizeFinanceState(rawFinance) {
       : {};
   const creditCardDefaults = {
     dueDay: sanitizeDueDay(rawCardDefaults.dueDay, 10),
-    dueInNextMonth:
-      typeof rawCardDefaults.dueInNextMonth === 'boolean'
-        ? rawCardDefaults.dueInNextMonth
-        : false,
     cardName:
       typeof rawCardDefaults.cardName === 'string' && rawCardDefaults.cardName.trim()
         ? rawCardDefaults.cardName.trim().slice(0, 60)
@@ -423,7 +435,7 @@ function sanitizeFinanceState(rawFinance) {
       const fallbackDueDay = sanitizeDueDay(bill.dueDay, creditCardDefaults.dueDay);
       const dueDate = isValidDateStr(bill.dueDate)
         ? bill.dueDate
-        : buildDateForYearMonth(ym, fallbackDueDay, creditCardDefaults.dueInNextMonth);
+        : buildDateForYearMonth(ym, fallbackDueDay, false);
       const dueDay = Number(dueDate.slice(8, 10));
 
       creditCardBills[ym] = {
@@ -440,7 +452,7 @@ function sanitizeFinanceState(rawFinance) {
   }
 
   return {
-    income: { baseMonthly, baseReceivedByMonth, extras },
+    income: { baseMonthly, payDay, baseReceivedByMonth, extras },
     expenses: { fixed, installments, variable, creditCardDefaults, creditCardBills },
     caixinhas: { cdiAnnualRate, boxes }
   };
@@ -518,7 +530,7 @@ export function validateAndSanitizeState(raw) {
       return Number.isFinite(n) && n >= 0 ? Math.round(n) : 0;
     });
     sanitizedSchedules.push({
-      id: typeof item.id === 'string' && item.id.trim() ? item.id.trim() : generateId('sched'),
+      id: sanitizeId(item.id, 'sched'),
       effectiveDate: item.effectiveDate,
       label: typeof item.label === 'string' && item.label.trim() ? item.label.trim().slice(0, 80) : 'Tarifa',
       weekdays: cleanWeekdays
@@ -562,11 +574,11 @@ export function validateAndSanitizeState(raw) {
     updatedAt: typeof raw.cardBalance?.updatedAt === 'string' ? raw.cardBalance.updatedAt : null
   };
 
-  // 7. Overrides de feriados embutidos
+  // 7. Overrides de feriados embutidos (restringido às chaves oficiais para evitar chaves arbitrárias / prototype pollution)
   const sanitizedOverrides = {};
   if (raw.holidayOverrides && typeof raw.holidayOverrides === 'object' && !Array.isArray(raw.holidayOverrides)) {
     for (const [key, ov] of Object.entries(raw.holidayOverrides)) {
-      if (!ov || typeof ov !== 'object') continue;
+      if (!BUILT_IN_HOLIDAY_KEYS.has(key) || !ov || typeof ov !== 'object') continue;
       const cleanOv = {};
       if (typeof ov.enabled === 'boolean') cleanOv.enabled = ov.enabled;
       if (typeof ov.name === 'string' && ov.name.trim()) cleanOv.name = ov.name.trim().slice(0, 80);
@@ -587,7 +599,7 @@ export function validateAndSanitizeState(raw) {
         ? ch.endDate
         : ch.startDate;
       sanitizedCustomHolidays.push({
-        id: typeof ch.id === 'string' && ch.id.trim() ? ch.id.trim() : generateId('hol'),
+        id: sanitizeId(ch.id, 'hol'),
         name: typeof ch.name === 'string' && ch.name.trim() ? ch.name.trim().slice(0, 80) : 'Feriado / Recesso',
         startDate: ch.startDate,
         endDate,

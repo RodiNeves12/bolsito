@@ -26,7 +26,7 @@ Luminosidade, paleta e privacidade são **desacopladas** no elemento `<html>` e 
 | **CTA Primário** | `--cta-bg`, `--cta-hover`, `--cta-text` |
 | **Destaque / Accent** | `--accent`, `--accent-hover`, `--accent-soft`, `--accent-border`, `--accent-text`, `--accent-contrast` |
 | **Semântica** | `--success` (`-soft`, `-border`, `-text`), `--warning` (`-soft`, `-border`, `-text`), `--danger` (`-hover`, `-soft`, `-border`, `-text`), `--holiday` (`-soft`, `-border`, `-text`), `--custom` (`-soft`, `-border`, `-text`) |
-| **Categorias Financeiras** | `--cat-transporte`, `--cat-alimentacao`, `--cat-assinaturas`, `--cat-moradia`, `--cat-lazer`, `--cat-saude`, `--cat-educacao`, `--cat-compras`, `--cat-dividas`, `--cat-outros` (derivadas dinamicamente dos tokens da paleta ativa) |
+| **Categorias Financeiras** | `--cat-transporte`, `--cat-cartao`, `--cat-alimentacao`, `--cat-assinaturas`, `--cat-moradia`, `--cat-lazer`, `--cat-saude`, `--cat-educacao`, `--cat-compras`, `--cat-dividas`, `--cat-outros` (derivadas dinamicamente dos tokens da paleta ativa) |
 | **Calendário & Gráfico** | `--day-normal-bg`, `--day-normal-hover`, `--zero-bg`, `--zero-text`, `--range-bg`, `--range-border`, `--chart-predicted` |
 | **Sombras & Brilho** | `--shadow-rgb`, `--card-highlight`, `--shadow-xs`, `--shadow-card`, `--shadow-card-hover`, `--shadow-pill-active`, `--shadow-md`, `--shadow-lg` |
 | **Raios & Movimento** | `--radius-sm` (`10px`), `--radius-md` (`14px`), `--radius-lg` (`18px`), `--radius-full` (`999px`), `--ease-fluid`, `--dur` (`180ms`) |
@@ -51,7 +51,7 @@ Declaradas via `@font-face` com Variable Fonts em `assets/fonts/` (pré-cacheada
 ## 3. Anatomia de Páginas e Componentes Reutilizáveis
 
 ### Layout Shell & Cabeçalho Padronizado
-- Desktop (`>= 960px`): `.app-shell` com `.app-sidebar` fixa (`230px`), identidade `Bolsito / Finanças Pessoais` com ícone `assets/icon-bolsito.png` (`40×40px`, `border-radius: 10px`, borda `1px solid rgba(255,255,255,0.12)`), navegação agrupada em 3 blocos (`FINANCEIRO`, `TRANSPORTE`, `SISTEMA`) e `.app-content` (`margin-left: var(--sidebar-width)`).
+- Desktop (`>= 960px`): `.app-shell` com `.app-sidebar` fixa (`230px`), identidade `Bolsito / Finanças Pessoais` com ícone `assets/icon-bolsito-192.png` (`40×40px`, `border-radius: 10px`, borda `1px solid rgba(255,255,255,0.12)`), navegação agrupada em 3 blocos (`FINANCEIRO`, `TRANSPORTE`, `SISTEMA`) e `.app-content` (`margin-left: var(--sidebar-width)`).
 - Mobile (`< 960px`): `.app-sidebar` vira header sticky superior e `.main-nav` vira *bottom nav* fixa de 5 alvos (`Início`, `Fluxo`, `Caixinhas`, `Passagens`, `Mais`) com alvos de toque `>= 44px` (`min-height: 48px`) e *sheet* `.mobile-more-sheet` para as visões secundárias.
 - Toda visão em `VIEW_HEADERS` (`js/ui.js`) atualiza o cabeçalho único `.editorial-header` com kicker numerado (`01 / VISÃO GERAL`, `02 / FLUXO MENSAL`, `03 / RESERVAS`, `04 / CONTROLE DIÁRIO`, `05 / PANORAMA ANUAL`, `06 / VIGÊNCIAS`, `07 / CALENDÁRIO OFICIAL`, `08 / SISTEMA`), título serifado e botão global `+ Novo Gasto` (atalho `N`).
 
@@ -119,7 +119,7 @@ Declaradas via `@font-face` com Variable Fonts em `assets/fonts/` (pré-cacheada
 - **Linhas de dados / métricas:** usar divisórias limpas (`1px solid var(--border)`) como em `.kpi-row`, `.metric-item`, `.holiday-row` e `.setting-row` — sem caixas aninhadas desnecessárias. Barras de progresso finas usam `.progress-track` + `.progress-fill` (`.is-warning` para alerta).
 - **Tabelas:** `.card.table-card` > `.table-responsive` > `table.data-table` (colunas numéricas com `.num.money`).
 - **Zona de perigo:** `.backup-block.danger-zone.danger-zone-box` (`--danger-soft` + `--danger-border`).
-- **Modais:** `.modal-backdrop` (`backdrop-filter: blur(6px)`) > `.modal-dialog` (ou `.modal-sm`) com `.modal-header`, `.modal-body` e `.modal-footer`. Fechamento por backdrop, botão X SVG e tecla `Escape`.
+- **Modais:** `.modal-backdrop` (`backdrop-filter: blur(6px)`) > `.modal-dialog` (ou `.modal-sm`) com `.modal-header`, `.modal-body` e `.modal-footer`. Gerenciados via `js/modalManager.js` com *focus trap*, restauração de foco, bloqueio de scroll (`body.modal-open`), pilha LIFO, fechamento por backdrop, botão X SVG e tecla `Escape`. Para confirmações destrutivas, usar `confirmDialog(...)` (`#confirm-dialog-modal`) em vez de `window.confirm()`.
 - **Notificações:** `showToast(message, 'default' | 'success' | 'error')` em `#toast-container`.
 
 ---

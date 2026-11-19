@@ -14,8 +14,16 @@ import {
   splitDateStr,
   WEEKDAY_NAMES_SHORT
 } from './holidays.js';
-import { centsToInputValue, formatBRL, sortFareSchedules, VALID_PALETTES } from './state.js';
+import {
+  centsToInputValue,
+  DEFAULT_CDI_ANNUAL_RATE,
+  DEFAULT_INCOME_PAY_DAY,
+  formatBRL,
+  sortFareSchedules,
+  VALID_PALETTES
+} from './state.js';
 import { getActiveFareSchedule } from './calculator.js';
+import { closeModal, openModal } from './modalManager.js';
 
 /**
  * Escapa texto de usuário antes de inserir em HTML.
@@ -110,11 +118,6 @@ export function applyTheme(themePref, palettePref = 'floresta') {
     metaTheme.setAttribute('content', colorMap[effectiveTheme]);
   }
 
-  const selectTheme = document.getElementById('select-theme-pref');
-  if (selectTheme) {
-    selectTheme.value = themePref;
-  }
-
   document.querySelectorAll('[data-theme-pref]').forEach((btn) => {
     const isActive = btn.dataset.themePref === themePref;
     btn.classList.toggle('is-active', isActive);
@@ -156,9 +159,14 @@ export function showToast(message, variant = 'default') {
   const container = document.getElementById('toast-container');
   if (!container) return;
 
+  const isPrivacyOn = document.documentElement.getAttribute('data-privacy') === 'on';
+  const safeMessage = isPrivacyOn
+    ? String(message ?? '').replace(/R\$\s*[\d.,]+/g, 'R$ •••')
+    : String(message ?? '');
+
   const toast = document.createElement('div');
   toast.className = `toast ${variant === 'error' ? 'toast-error' : variant === 'success' ? 'toast-success' : ''}`;
-  toast.textContent = message;
+  toast.textContent = safeMessage;
   container.appendChild(toast);
 
   setTimeout(() => {
@@ -235,13 +243,17 @@ export function populateMonthYearSelectors(selectedYear, selectedMonth) {
   const currentYear = Number(getTodayStr().slice(0, 4));
   const minYear = Math.min(currentYear - 3, selectedYear - 2);
   const maxYear = Math.max(currentYear + 5, selectedYear + 2);
+  const rangeKey = `${minYear}:${maxYear}`;
 
-  yearSelect.innerHTML = '';
-  for (let y = minYear; y <= maxYear; y++) {
-    const opt = document.createElement('option');
-    opt.value = String(y);
-    opt.textContent = String(y);
-    yearSelect.appendChild(opt);
+  if (yearSelect.dataset.yearRange !== rangeKey) {
+    yearSelect.innerHTML = '';
+    for (let y = minYear; y <= maxYear; y++) {
+      const opt = document.createElement('option');
+      opt.value = String(y);
+      opt.textContent = String(y);
+      yearSelect.appendChild(opt);
+    }
+    yearSelect.dataset.yearRange = rangeKey;
   }
   yearSelect.value = String(selectedYear);
 }
@@ -303,7 +315,7 @@ export function renderCardBalance(projection, state) {
         <div class="metric-label">02 / RECARGA</div>
         <div class="metric-value money">R$ 0,00</div>
         <div class="metric-sub">
-          Mês atual coberto • sobra prevista: <strong>${formatBRL(projection.projectedMonthEndSurplusCents)}</strong>
+          Mês atual coberto • sobra prevista: <strong class="money">${formatBRL(projection.projectedMonthEndSurplusCents)}</strong>
           <small class="metric-sub metric-footnote">Baseado na estimativa do mês corrente</small>
         </div>
       </div>
@@ -324,7 +336,7 @@ export function renderCardBalance(projection, state) {
     autonomyClass = 'tile-danger';
     autonomyValue = projection.balanceCents === 0 ? 'Saldo zerado' : 'Insuficiente';
     autonomySub = projection.firstUncoveredActiveDate
-      ? `Próximo gasto em ${formatDisplayDate(projection.firstUncoveredActiveDate)} (${formatBRL(projection.firstUncoveredCostCents)}; faltam ${formatBRL(projection.shortfallOnFirstUncoveredCents)})`
+      ? `Próximo gasto em ${formatDisplayDate(projection.firstUncoveredActiveDate)} (<span class="money">${formatBRL(projection.firstUncoveredCostCents)}</span>; faltam <span class="money">${formatBRL(projection.shortfallOnFirstUncoveredCents)}</span>)`
       : 'Nenhum dia com gasto previsto';
   } else {
     const endDateLabel = projection.lastCoveredDate
@@ -333,7 +345,7 @@ export function renderCardBalance(projection, state) {
     autonomyValue = endDateLabel;
     const leftoverText =
       projection.leftoverCents > 0
-        ? ` • troco de ${formatBRL(projection.leftoverCents)}`
+        ? ` • troco de <span class="money">${formatBRL(projection.leftoverCents)}</span>`
         : '';
     const nextNeedText = projection.firstUncoveredActiveDate
       ? ` • recarregar p/ ${formatDisplayDate(projection.firstUncoveredActiveDate)}`
@@ -536,6 +548,7 @@ export function renderCalendarGrid(monthData, uiState) {
       .join(' ');
 
     const ariaLabel = `${formatDisplayDateWithWeekday(day.dateStr)}: ${formatBRL(day.effectiveCents)}${metaText ? ` — ${metaText}` : ''}`;
+    const safeTooltip = `${formatDisplayDateWithWeekday(day.dateStr)}${metaText ? ` — ${metaText}` : ''}`;
 
     fragments.push(`
       <button
@@ -543,7 +556,7 @@ export function renderCalendarGrid(monthData, uiState) {
         class="${classes}"
         data-date="${day.dateStr}"
         aria-label="${escapeHtml(ariaLabel)}"
-        title="${escapeHtml(ariaLabel)}"
+        title="${escapeHtml(safeTooltip)}"
       >
         <div class="day-cell-top">
           <span class="day-number">${dayNum}</span>
@@ -652,15 +665,15 @@ export function renderMonthlySummary(monthData, yearSummary, cardProjection) {
   if (carryInfoEl) {
     const sourceLabel =
       monthData.recordedRechargeCents !== null
-        ? `Com recarga efetiva de ${formatBRL(monthData.recordedRechargeCents)}`
-        : `Usando orçamento previsto (${formatBRL(monthData.plannedDepositCents)})`;
+        ? `Com recarga efetiva de <span class="money">${formatBRL(monthData.recordedRechargeCents)}</span>`
+        : `Usando orçamento previsto (<span class="money">${formatBRL(monthData.plannedDepositCents)}</span>)`;
 
     if (monthData.carryOutCents > 0) {
-      carryInfoEl.innerHTML = `${sourceLabel}: gera <strong class="text-success">crédito de ${formatBRL(monthData.carryOutCents)}</strong> que abate automaticamente o mês seguinte.`;
+      carryInfoEl.innerHTML = `${sourceLabel}: gera <strong class="money text-success">crédito de ${formatBRL(monthData.carryOutCents)}</strong> que abate automaticamente o mês seguinte.`;
     } else if (monthData.carryOutCents < 0) {
-      carryInfoEl.innerHTML = `${sourceLabel}: gera <strong class="text-danger">déficit de ${formatBRL(Math.abs(monthData.carryOutCents))}</strong> acumulado para o mês seguinte.`;
+      carryInfoEl.innerHTML = `${sourceLabel}: gera <strong class="money text-danger">déficit de ${formatBRL(Math.abs(monthData.carryOutCents))}</strong> acumulado para o mês seguinte.`;
     } else {
-      carryInfoEl.textContent = `${sourceLabel}: saldo zerado na virada para o próximo mês.`;
+      carryInfoEl.innerHTML = `${sourceLabel}: saldo zerado na virada para o próximo mês.`;
     }
   }
 
@@ -727,7 +740,7 @@ export function renderMonthlySummary(monthData, yearSummary, cardProjection) {
         <div class="metric-item-top">
           <div>
             <span class="metric-item-label">Total de ${yearSummary.year} (Realizado)</span>
-            <span class="metric-item-sub">Previsto base: ${formatBRL(yearSummary.totalPredictedBaseCents)}</span>
+            <span class="metric-item-sub">Previsto base: <span class="money">${formatBRL(yearSummary.totalPredictedBaseCents)}</span></span>
           </div>
           <span class="metric-item-value money">${formatBRL(yearSummary.totalActualCents)}</span>
         </div>
@@ -741,7 +754,7 @@ export function renderMonthlySummary(monthData, yearSummary, cardProjection) {
       <div class="metric-item">
         <div>
           <span class="metric-item-label">Economia no mês</span>
-          <span class="metric-item-sub">Feriados: ${formatBRL(monthData.holidaySavingsCents)} • Manual: ${formatBRL(monthData.manualSavingsCents)}</span>
+          <span class="metric-item-sub">Feriados: <span class="money">${formatBRL(monthData.holidaySavingsCents)}</span> • Manual: <span class="money">${formatBRL(monthData.manualSavingsCents)}</span></span>
         </div>
         <span class="metric-item-value money text-success">${formatBRL(monthData.totalSavingsCents)}</span>
       </div>
@@ -749,7 +762,7 @@ export function renderMonthlySummary(monthData, yearSummary, cardProjection) {
       <div class="metric-item">
         <div>
           <span class="metric-item-label">Economia acumulada em ${yearSummary.year}</span>
-          <span class="metric-item-sub">Feriados: ${formatBRL(yearSummary.totalHolidaySavingsCents)} • Manual: ${formatBRL(yearSummary.totalManualSavingsCents)}</span>
+          <span class="metric-item-sub">Feriados: <span class="money">${formatBRL(yearSummary.totalHolidaySavingsCents)}</span> • Manual: <span class="money">${formatBRL(yearSummary.totalManualSavingsCents)}</span></span>
         </div>
         <span class="metric-item-value money text-success">${formatBRL(yearSummary.totalSavingsCents)}</span>
       </div>
@@ -757,7 +770,7 @@ export function renderMonthlySummary(monthData, yearSummary, cardProjection) {
       <div class="metric-item">
         <div>
           <span class="metric-item-label">Média real no mês</span>
-          <span class="metric-item-sub">Por dia ativo: ${formatBRL(monthData.avgPerActiveDayCents)}</span>
+          <span class="metric-item-sub">Por dia ativo: <span class="money">${formatBRL(monthData.avgPerActiveDayCents)}</span></span>
         </div>
         <span class="metric-item-value money">${formatBRL(monthData.avgPerWeekCents)}/sem</span>
       </div>
@@ -794,12 +807,12 @@ export function renderAnnualView(yearSummary) {
       <div class="annual-kpi-card">
         <span>Economia Total no Ano</span>
         <strong class="money text-success">${formatBRL(yearSummary.totalSavingsCents)}</strong>
-        <small>Feriados: ${formatBRL(yearSummary.totalHolidaySavingsCents)} • Manual: ${formatBRL(yearSummary.totalManualSavingsCents)}</small>
+        <small>Feriados: <span class="money">${formatBRL(yearSummary.totalHolidaySavingsCents)}</span> • Manual: <span class="money">${formatBRL(yearSummary.totalManualSavingsCents)}</span></small>
       </div>
       <div class="annual-kpi-card">
         <span>Média Real de Gasto</span>
         <strong class="money">${formatBRL(yearSummary.avgPerWeekCents)}/sem</strong>
-        <small>Por dia ativo: ${formatBRL(yearSummary.avgPerActiveDayCents)}</small>
+        <small>Por dia ativo: <span class="money">${formatBRL(yearSummary.avgPerActiveDayCents)}</span></small>
       </div>
     `;
   }
@@ -883,7 +896,7 @@ export function renderAnnualView(yearSummary) {
 
         const rechargeTag =
           m.recordedRechargeCents !== null
-            ? `<span class="pill pill-muted" title="Recarga efetiva informada">Rec. ${formatBRL(m.recordedRechargeCents)}</span>`
+            ? `<span class="pill pill-muted" title="Recarga efetiva informada">Rec. <span class="money">${formatBRL(m.recordedRechargeCents)}</span></span>`
             : '';
 
         return `
@@ -963,12 +976,12 @@ export function renderFaresView(state) {
               <p class="muted-text">Vigente a partir de <strong>${formatDisplayDate(sched.effectiveDate)}</strong></p>
             </div>
             <div class="holiday-row-actions">
-              <button type="button" class="btn btn-outline btn-sm" data-edit-fare="${sched.id}">
+              <button type="button" class="btn btn-outline btn-sm" data-edit-fare="${escapeHtml(sched.id)}">
                 Editar
               </button>
               ${
                 canDelete
-                  ? `<button type="button" class="btn btn-ghost btn-danger-ghost btn-sm" data-delete-fare="${sched.id}">Excluir</button>`
+                  ? `<button type="button" class="btn btn-ghost btn-danger-ghost btn-sm" data-delete-fare="${escapeHtml(sched.id)}">Excluir</button>`
                   : ''
               }
             </div>
@@ -1025,7 +1038,7 @@ export function renderHolidaysView(year, state) {
               <button
                 type="button"
                 class="btn btn-ghost btn-sm"
-                data-edit-builtin-holiday="${h.key}"
+                data-edit-builtin-holiday="${escapeHtml(h.key)}"
                 title="Editar nome ou efeito"
               >
                 Editar
@@ -1033,7 +1046,7 @@ export function renderHolidaysView(year, state) {
               <label class="switch" title="${h.enabled ? 'Desativar feriado' : 'Ativar feriado'}">
                 <input
                   type="checkbox"
-                  data-toggle-builtin-holiday="${h.key}"
+                  data-toggle-builtin-holiday="${escapeHtml(h.key)}"
                   ${h.enabled ? 'checked' : ''}
                   aria-label="Ativar ${escapeHtml(h.name)}"
                 />
@@ -1083,16 +1096,16 @@ export function renderHolidaysView(year, state) {
               </div>
               <div class="holiday-row-actions">
                 ${effectBadge}
-                <button type="button" class="btn btn-ghost btn-sm" data-edit-custom-holiday="${ch.id}">
+                <button type="button" class="btn btn-ghost btn-sm" data-edit-custom-holiday="${escapeHtml(ch.id)}">
                   Editar
                 </button>
-                <button type="button" class="btn btn-ghost btn-danger-ghost btn-sm" data-delete-custom-holiday="${ch.id}">
+                <button type="button" class="btn btn-ghost btn-danger-ghost btn-sm" data-delete-custom-holiday="${escapeHtml(ch.id)}">
                   Excluir
                 </button>
                 <label class="switch" title="${ch.enabled ? 'Desativar' : 'Ativar'}">
                   <input
                     type="checkbox"
-                    data-toggle-custom-holiday="${ch.id}"
+                    data-toggle-custom-holiday="${escapeHtml(ch.id)}"
                     ${ch.enabled ? 'checked' : ''}
                     aria-label="Ativar ${escapeHtml(ch.name)}"
                   />
@@ -1112,17 +1125,28 @@ export function renderHolidaysView(year, state) {
  */
 export function renderBackupView(state) {
   const finance = state.finance || {};
-  const cdiRate = finance.caixinhas?.cdiAnnualRate ?? 10.65;
+  const cdiRate = finance.caixinhas?.cdiAnnualRate ?? DEFAULT_CDI_ANNUAL_RATE;
   const baseIncomeCents = finance.income?.baseMonthly || 0;
+  const incomePayDay = finance.income?.payDay ?? DEFAULT_INCOME_PAY_DAY;
 
   const baseIncomeInput = document.getElementById('input-config-base-income');
   if (baseIncomeInput && document.activeElement !== baseIncomeInput) {
     baseIncomeInput.value = centsToInputValue(baseIncomeCents);
   }
 
+  const payDayInput = document.getElementById('input-config-pay-day');
+  if (payDayInput && document.activeElement !== payDayInput) {
+    payDayInput.value = String(incomePayDay);
+  }
+
   const cdiRateInput = document.getElementById('input-config-cdi-rate');
   if (cdiRateInput && document.activeElement !== cdiRateInput) {
     cdiRateInput.value = Number(cdiRate).toFixed(2).replace('.', ',');
+  }
+
+  const chkTodaySettings = document.getElementById('chk-include-today-settings');
+  if (chkTodaySettings) {
+    chkTodaySettings.checked = state.settings?.includeTodayInProjection !== false;
   }
 
   const statsEl = document.getElementById('storage-stats');
@@ -1169,7 +1193,7 @@ export function openDayModal(dayCalc) {
   if (!backdrop) return;
 
   titleEl.textContent = formatDisplayDateWithWeekday(dayCalc.dateStr);
-  subtitleEl.textContent = `Tarifa base vigente: ${formatBRL(dayCalc.scheduledBaseCents)} (${dayCalc.schedule?.label || 'Sem tabela'}) • Atual: ${formatBRL(dayCalc.effectiveCents)}`;
+  subtitleEl.innerHTML = `Tarifa base vigente: <span class="money">${formatBRL(dayCalc.scheduledBaseCents)}</span> (${escapeHtml(dayCalc.schedule?.label || 'Sem tabela')}) • Atual: <span class="money">${formatBRL(dayCalc.effectiveCents)}</span>`;
 
   if (dayCalc.holiday) {
     holidayBanner.classList.remove('hidden');
@@ -1215,12 +1239,13 @@ export function openDayModal(dayCalc) {
     clearBtn.classList.toggle('hidden', !dayCalc.exception);
   }
 
-  backdrop.classList.remove('hidden');
-  document.getElementById('btn-day-zero')?.focus();
+  openModal('day-modal-backdrop', {
+    focusEl: document.getElementById('btn-day-zero')
+  });
 }
 
 export function closeDayModal() {
-  document.getElementById('day-modal-backdrop')?.classList.add('hidden');
+  closeModal('day-modal-backdrop');
 }
 
 /**
@@ -1230,12 +1255,12 @@ export function openBuiltInHolidayModal(holidayItem) {
   const modal = document.getElementById('builtin-holiday-modal');
   if (!modal) return;
   document.getElementById('input-builtin-key').value = holidayItem.key;
-  document.getElementById('input-builtin-name').value = holidayItem.name;
+  const nameInput = document.getElementById('input-builtin-name');
+  nameInput.value = holidayItem.name;
   document.getElementById('select-builtin-effect').value = holidayItem.effect;
-  modal.classList.remove('hidden');
-  document.getElementById('input-builtin-name').focus();
+  openModal('builtin-holiday-modal', { focusEl: nameInput });
 }
 
 export function closeBuiltInHolidayModal() {
-  document.getElementById('builtin-holiday-modal')?.classList.add('hidden');
+  closeModal('builtin-holiday-modal');
 }
